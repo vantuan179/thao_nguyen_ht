@@ -1,52 +1,77 @@
--- PostgreSQL schema for Math Kids
--- Run this script once before starting the application.
+-- ============================================================
+-- SQL Schema PostgreSQL cho hệ thống Website Học Toán Trẻ Em
+-- ============================================================
 
-CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'STUDENT',
-    full_name VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS progress CASCADE;
+DROP TABLE IF EXISTS quizzes CASCADE;
+DROP TABLE IF EXISTS lessons CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Bảng người dùng (trẻ em / phụ huynh / admin)
+CREATE TABLE users (
+    id          SERIAL PRIMARY KEY,
+    username    VARCHAR(50) NOT NULL UNIQUE,
+    password    VARCHAR(255) NOT NULL,
+    full_name   VARCHAR(100),
+    role        VARCHAR(20) NOT NULL DEFAULT 'CHILD', -- ADMIN / CHILD
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS lessons (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
+-- Bảng bài học toán
+CREATE TABLE lessons (
+    id          SERIAL PRIMARY KEY,
+    title       VARCHAR(200) NOT NULL,
     description TEXT,
-    grade_level INTEGER,
-    order_index INTEGER DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    grade       INT NOT NULL DEFAULT 1,
+    content     TEXT,
+    video_url   VARCHAR(500),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS quizzes (
-    id BIGSERIAL PRIMARY KEY,
-    lesson_id BIGINT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
-    question_text TEXT NOT NULL,
-    question_type VARCHAR(30) NOT NULL DEFAULT 'MULTIPLE_CHOICE',
-    correct_answer VARCHAR(100) NOT NULL,
-    points INTEGER DEFAULT 10,
-    order_index INTEGER DEFAULT 0
+-- Bảng câu đố / bài tập trắc nghiệm
+CREATE TABLE quizzes (
+    id              SERIAL PRIMARY KEY,
+    lesson_id       INT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    question        TEXT NOT NULL,
+    option_a        VARCHAR(255) NOT NULL,
+    option_b        VARCHAR(255) NOT NULL,
+    option_c        VARCHAR(255) NOT NULL,
+    option_d        VARCHAR(255) NOT NULL,
+    correct_option  CHAR(1) NOT NULL CHECK (correct_option IN ('A','B','C','D')),
+    explanation     TEXT,
+    points          INT DEFAULT 10
 );
 
-CREATE TABLE IF NOT EXISTS quiz_options (
-    id BIGSERIAL PRIMARY KEY,
-    quiz_id BIGINT NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
-    option_text VARCHAR(200) NOT NULL,
-    is_correct BOOLEAN NOT NULL DEFAULT FALSE
+-- Bảng tiến độ học tập
+CREATE TABLE progress (
+    id              SERIAL PRIMARY KEY,
+    user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    quiz_id         INT NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
+    selected_option CHAR(1),
+    is_correct      BOOLEAN,
+    score           INT DEFAULT 0,
+    completed_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, quiz_id)
 );
 
-CREATE TABLE IF NOT EXISTS progress (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    lesson_id BIGINT REFERENCES lessons(id) ON DELETE SET NULL,
-    quiz_id BIGINT REFERENCES quizzes(id) ON DELETE SET NULL,
-    score INTEGER DEFAULT 0,
-    completed BOOLEAN DEFAULT FALSE,
-    attempts INTEGER DEFAULT 1,
-    last_attempt_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+-- Dữ liệu mẫu
+INSERT INTO users (username, password, full_name, role) VALUES
+('admin', 'admin123', 'Quản trị viên', 'ADMIN'),
+('be_nam', '123456', 'Bé Nam', 'CHILD'),
+('be_linh', '123456', 'Bé Linh', 'CHILD');
 
-CREATE INDEX IF NOT EXISTS idx_quizzes_lesson ON quizzes(lesson_id);
-CREATE INDEX IF NOT EXISTS idx_options_quiz ON quiz_options(quiz_id);
-CREATE INDEX IF NOT EXISTS idx_progress_user ON progress(user_id);
+INSERT INTO lessons (title, description, grade, content, video_url) VALUES
+('Cộng hai số đến 10', 'Học cách cộng hai số có tổng không vượt quá 10', 1,
+ 'Cộng là ghép hai nhóm đồ vật lại với nhau. Ví dụ: 3 quả táo + 2 quả táo = 5 quả táo.', NULL),
+('Trừ trong phạm vi 10', 'Học phép trừ khi số bị trừ không vượt quá 10', 1,
+ 'Trừ là lấy đi một phần. Ví dụ: 7 kẹo - 2 kẹo = 5 kẹo.', NULL),
+('Nhận biết hình học', 'Làm quen với hình tròn, vuông, tam giác, chữ nhật', 1,
+ 'Hình tròn tròn trịa, hình vuông có 4 cạnh bằng nhau, tam giác có 3 cạnh.', NULL);
+
+INSERT INTO quizzes (lesson_id, question, option_a, option_b, option_c, option_d, correct_option, explanation, points) VALUES
+(1, '3 + 2 = ?', '4', '5', '6', '7', 'B', '3 + 2 = 5', 10),
+(1, '4 + 4 = ?', '7', '8', '9', '10', 'B', '4 + 4 = 8', 10),
+(1, '1 + 6 = ?', '5', '6', '7', '8', 'C', '1 + 6 = 7', 10),
+(2, '7 - 2 = ?', '4', '5', '6', '7', 'B', '7 - 2 = 5', 10),
+(2, '9 - 4 = ?', '4', '5', '6', '3', 'B', '9 - 4 = 5', 10),
+(3, 'Hình nào có 3 cạnh?', 'Tròn', 'Vuông', 'Tam giác', 'Chữ nhật', 'C', 'Tam giác có 3 cạnh', 10);
