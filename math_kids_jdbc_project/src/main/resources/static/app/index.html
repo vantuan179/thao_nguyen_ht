@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" ng-app="mathKidsApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌈 Học Toán Vui Cho Bé</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body ng-controller="MainController">
+    <div class="sky-background">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+    <header class="app-header animate__animated animate__bounceInDown">
+        <h1>🌟 Học Toán Vui Cho Bé 🌟</h1>
+        <p class="subtitle">Cùng bé vui học cộng, trừ, nhân, chia!</p>
+    </header>
+
+    <main class="container">
+        <!-- Login / Register -->
+        <section class="card login-card animate__animated animate__zoomIn" ng-if="!currentUser">
+            <h2>👋 Xin chào bé!</h2>
+            <p>Nhập tên của bé để bắt đầu nhé:</p>
+            <input type="text" ng-model="studentName" placeholder="Tên của bé..." class="kid-input">
+            <button class="btn btn-primary animate__animated animate__pulse animate__infinite" ng-click="login()">🚀 Bắt đầu học</button>
+        </section>
+
+        <!-- Dashboard -->
+        <section ng-if="currentUser && !selectedLesson" class="animate__animated animate__fadeInUp">
+            <div class="card welcome-card">
+                <h2>🎉 Chào {{ currentUser.fullName || currentUser.username }}!</h2>
+                <p>Chọn một bài học dưới đây để bắt đầu:</p>
+            </div>
+            <div class="lessons-grid">
+                <div class="lesson-card animate__animated animate__bounceIn" ng-repeat="lesson in lessons" ng-click="selectLesson(lesson)" style="animation-delay: {{$index * 0.1}}s">
+                    <div class="lesson-icon">{{ lessonIcons[$index % lessonIcons.length] }}</div>
+                    <h3>{{ lesson.title }}</h3>
+                    <p>{{ lesson.description }}</p>
+                    <span class="badge">Lớp {{ lesson.gradeLevel }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Area -->
+        <section ng-if="selectedLesson && !finished" class="quiz-area animate__animated animate__fadeIn">
+            <div class="card quiz-card">
+                <button class="btn btn-back" ng-click="backToLessons()">⬅ Quay lại</button>
+                <h2>{{ selectedLesson.title }}</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (currentIndex / quizzes.length) * 100 }}%"></div>
+                </div>
+                <p class="question-counter">Câu {{ currentIndex + 1 }} / {{ quizzes.length }}</p>
+
+                <div class="question-box animate__animated animate__rubberBand" ng-if="currentQuiz">
+                    <h3>{{ currentQuiz.questionText }}</h3>
+                    <div class="options-grid" ng-if="currentQuiz.options && currentQuiz.options.length > 0">
+                        <button class="option-btn animate__animated animate__flipInX"
+                                ng-repeat="opt in currentQuiz.options"
+                                ng-click="submitAnswer(opt.optionText)"
+                                ng-disabled="answered"
+                                style="animation-delay: {{$index * 0.1}}s">
+                            {{ opt.optionText }}
+                        </button>
+                    </div>
+                    <div class="input-answer" ng-if="!currentQuiz.options || currentQuiz.options.length === 0">
+                        <input type="text" ng-model="studentAnswer" placeholder="Nhập đáp án..." class="kid-input" ng-disabled="answered">
+                        <button class="btn btn-primary" ng-click="submitAnswer(studentAnswer)" ng-disabled="answered">✅ Trả lời</button>
+                    </div>
+                </div>
+
+                <div class="feedback animate__animated" ng-class="feedbackClass" ng-if="feedbackMessage">
+                    <p>{{ feedbackMessage }}</p>
+                    <button class="btn btn-next" ng-click="nextQuestion()" ng-if="answered">➡ Câu tiếp theo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result -->
+        <section ng-if="finished" class="result-area animate__animated animate__tada">
+            <div class="card result-card">
+                <h2>🏆 Kết quả của bé</h2>
+                <p class="score-text">{{ correctCount }} / {{ quizzes.length }} câu đúng</p>
+                <p class="encourage-text">{{ encourageText }}</p>
+                <button class="btn btn-primary" ng-click="backToLessons()">🔄 Chơi lại</button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>© 2024 Học Toán Vui Cho Bé 💖</p>
+    </footer>
+
+    <!-- Confetti / Fireworks overlay -->
+    <div id="effects" class="effects-layer"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
