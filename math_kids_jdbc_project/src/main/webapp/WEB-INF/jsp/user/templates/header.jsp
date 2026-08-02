@@ -25,7 +25,7 @@
     
     <!-- Page-specific CSS -->
     <c:if test="${not empty pageCss}">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/${pageCss}">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/${pageCss}">
     </c:if>
 </head>
 <body>

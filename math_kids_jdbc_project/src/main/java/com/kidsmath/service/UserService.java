@@ -36,4 +36,8 @@ public class UserService {
     public int deleteById(Integer id) {
         return userDao.deleteById(id);
     }
+    
+    public User findByEmail(String email) {
+        return userDao.findByEmail(email);
+    }
 }
