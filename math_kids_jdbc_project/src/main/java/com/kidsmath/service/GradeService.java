@@ -30,7 +30,6 @@ public class GradeService {
 	}
 
 	public void save(Grade grade) {
-		// Nếu displayOrder chưa được set, lấy max + 1
 		if (grade.getDisplayOrder() == null || grade.getDisplayOrder() == 0) {
 			int maxOrder = gradeDao.getMaxDisplayOrder();
 			grade.setDisplayOrder(maxOrder + 1);

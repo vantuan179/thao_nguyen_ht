@@ -35,26 +35,45 @@ public class UserController {
 	// ===== HOME - Hiển thị danh sách lớp học =====
 	@GetMapping("/")
 	public String home(Model model) {
+		System.out.println("=== HOME PAGE CALLED ===");
+
+		// Lấy danh sách lớp học đang hoạt động
 		List<Grade> grades = gradeService.findActiveGrades();
+		System.out.println("Found grades: " + (grades != null ? grades.size() : 0));
+
+		// Lấy số lượng bài học cho mỗi lớp
 		for (Grade grade : grades) {
 			List<Lesson> lessons = lessonService.findByGrade(grade.getId());
 			grade.setLessons(lessons);
+			System.out.println("Grade " + grade.getId() + " has " + (lessons != null ? lessons.size() : 0) + " lessons");
 		}
+
 		model.addAttribute("grades", grades);
-		return "user/home";
+		return "user/home"; // Trả về trang home.jsp
 	}
 
 	// ===== LESSON DETAIL =====
 	@GetMapping("/lesson/{id}")
 	public String lessonDetail(@PathVariable("id") Integer id, Model model) {
+		System.out.println("=== LESSON DETAIL CALLED ===");
+		System.out.println("Lesson ID: " + id);
+
 		Lesson lesson = lessonService.findById(id);
+		if (lesson == null) {
+			System.out.println("Lesson not found for ID: " + id);
+			return "redirect:/";
+		}
+
 		List<Quiz> quizzes = quizService.findByLessonId(id);
 		int totalPoints = quizService.getTotalPointsByLessonId(id);
+
+		System.out.println("Found quizzes: " + (quizzes != null ? quizzes.size() : 0));
+		System.out.println("Total points: " + totalPoints);
 
 		model.addAttribute("lesson", lesson);
 		model.addAttribute("quizzes", quizzes);
 		model.addAttribute("totalPoints", totalPoints);
-		model.addAttribute("questionCount", quizzes.size());
+		model.addAttribute("questionCount", quizzes != null ? quizzes.size() : 0);
 		return "user/lesson";
 	}
 
@@ -69,6 +88,7 @@ public class UserController {
 		User user = userService.findByUsername(username);
 		if (user != null && user.getPassword().equals(password)) {
 			session.setAttribute("currentUser", user);
+			userService.updateLastLogin(user.getId());
 			if ("ADMIN".equals(user.getRole())) {
 				return "redirect:/admin";
 			}
@@ -116,7 +136,7 @@ public class UserController {
 
 		// 4. Kiểm tra tên đăng nhập đã tồn tại chưa
 		if (userService.existsByUsername(username)) {
-			model.addAttribute("error", "Tên đăng nhập đã được sử dụng! Vui lòng chọn tên khác.");
+			model.addAttribute("error", "Tên đăng nhập '" + username + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
 			model.addAttribute("email", email);
 			return "user/register";
@@ -124,7 +144,7 @@ public class UserController {
 
 		// 5. Kiểm tra email đã tồn tại chưa
 		if (userService.existsByEmail(email)) {
-			model.addAttribute("error", "Email đã được sử dụng! Vui lòng sử dụng email khác.");
+			model.addAttribute("error", "Email '" + email + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
 			model.addAttribute("username", username);
 			return "user/register";

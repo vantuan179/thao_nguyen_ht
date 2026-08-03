@@ -4,7 +4,14 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
 <%
-pageContext.setAttribute("pageTitle", lesson != null ? lesson.getTitle() + " - Bé Học Toán" : "Bài học - Bé Học Toán");
+// Kiểm tra lesson có tồn tại không trước khi dùng
+String pageTitle = "Bài học - Bé Học Toán";
+Object lessonObj = request.getAttribute("lesson");
+if (lessonObj != null) {
+	com.kidsmath.model.Lesson lesson = (com.kidsmath.model.Lesson) lessonObj;
+	pageTitle = lesson.getTitle() + " - Bé Học Toán";
+}
+pageContext.setAttribute("pageTitle", pageTitle);
 pageContext.setAttribute("pageJs", "lesson.js");
 %>
 
@@ -33,7 +40,6 @@ pageContext.setAttribute("pageJs", "lesson.js");
 	href="${pageContext.request.contextPath}/assets/css/style.css">
 
 <style>
-/* ===== LESSON SPECIFIC STYLES ===== */
 body {
 	font-family: 'Quicksand', sans-serif;
 	background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
@@ -102,20 +108,10 @@ body {
 	color: #155724;
 }
 
-.option-btn.correct:hover {
-	background: #d4edda;
-	transform: none;
-}
-
 .option-btn.wrong {
 	background: #f8d7da;
 	border-color: #dc3545;
 	color: #721c24;
-}
-
-.option-btn.wrong:hover {
-	background: #f8d7da;
-	transform: none;
 }
 
 .option-btn .option-label {
@@ -176,80 +172,6 @@ body {
 	background: #f8d7da;
 }
 
-/* ===== CONFETTI ===== */
-.confetti {
-	position: fixed;
-	width: 12px;
-	height: 12px;
-	border-radius: 2px;
-	animation: confetti-fall 3s linear forwards;
-	z-index: 9999;
-	pointer-events: none;
-}
-
-@
-keyframes confetti-fall { 0% {
-	transform: translateY(-10vh) rotate(0deg) scale(1);
-	opacity: 1;
-}
-
-100
-
-
-%
-{
-transform
-
-
-:
-
-
-translateY
-(
-
-
-110vh
-
-
-)
-
-
-rotate
-(
-
-
-720deg
-
-
-)
-
-
-scale
-(
-
-
-0
-.5
-
-
-)
-;
-
-
-opacity
-
-
-:
-
-
-0
-;
-
-
-}
-}
-
-/* ===== RESPONSIVE ===== */
 @media ( max-width : 768px) {
 	.score-board {
 		top: 10px;
@@ -271,22 +193,11 @@ opacity
 		padding: 12px 15px;
 	}
 }
-
-@media ( max-width : 576px) {
-	.score-board {
-		position: relative;
-		top: 0;
-		right: 0;
-		margin-bottom: 20px;
-		display: flex;
-		justify-content: space-around;
-	}
-}
 </style>
 </head>
 <body>
 
-	<!-- ===== SCORE BOARD ===== -->
+	<!-- Score Board -->
 	<div class="score-board animate__animated animate__bounceIn">
 		<span class="score-item"> <i class="fas fa-star text-warning"></i>
 			Điểm: <span id="total-score" class="text-warning font-weight-bold">0</span>
@@ -295,18 +206,18 @@ opacity
 			id="correct-count" class="text-success font-weight-bold">0</span>
 		</span> <span class="score-item"> <i
 			class="fas fa-question-circle text-info"></i> Còn: <span
-			id="remaining-count" class="text-info font-weight-bold">${quizzes.size()}</span>
+			id="remaining-count" class="text-info font-weight-bold">${questionCount}</span>
 		</span>
 	</div>
 
 	<div class="container py-4">
-		<!-- ===== BACK BUTTON ===== -->
-		<a href="${pageContext.request.contextPath}/grades/${lesson.grade}"
+		<!-- Back Button -->
+		<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
 			class="btn btn-light rounded-pill mb-3 font-weight-bold shadow-sm">
 			<i class="fas fa-arrow-left"></i> Quay lại
 		</a>
 
-		<!-- ===== LESSON BOX ===== -->
+		<!-- Lesson Box -->
 		<div class="lesson-box animate__animated animate__fadeInDown">
 			<div class="text-center">
 				<div style="font-size: 3rem;">📚</div>
@@ -338,7 +249,7 @@ opacity
 			</c:if>
 		</div>
 
-		<!-- ===== QUIZ LIST ===== -->
+		<!-- Quiz List -->
 		<h2 class="text-center mt-5 mb-4 text-info font-weight-bold">
 			<i class="fas fa-pencil-alt"></i> Câu hỏi luyện tập
 		</h2>
@@ -412,8 +323,7 @@ opacity
 						<div style="font-size: 4rem;">📝</div>
 						<h4 class="text-muted mt-3">Chưa có câu hỏi cho bài học này</h4>
 						<p class="text-muted">Vui lòng quay lại sau nhé!</p>
-						<a
-							href="${pageContext.request.contextPath}/grades/${lesson.grade}"
+						<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
 							class="btn btn-fun btn-fun-primary mt-3"> <i
 							class="fas fa-arrow-left"></i> Quay lại bài học
 						</a>
@@ -422,32 +332,30 @@ opacity
 			</c:choose>
 		</div>
 
-		<!-- ===== BACK TO LESSONS ===== -->
+		<!-- Back to Lessons -->
 		<div class="text-center mt-4">
-			<a href="${pageContext.request.contextPath}/grades/${lesson.grade}"
+			<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
 				class="btn btn-outline-primary btn-fun"> <i
 				class="fas fa-arrow-left"></i> Quay lại danh sách bài học
 			</a>
 		</div>
 	</div>
 
-	<!-- ===== SCRIPTS ===== -->
+	<!-- Scripts -->
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-	<!-- ===== LESSON JS ===== -->
 	<script>
 		$(document)
 				.ready(
 						function() {
-							// ===== VARIABLES =====
 							var totalScore = 0;
 							var correctCount = 0;
 							var totalQuestions = $('.quiz-card').length;
 							var answeredQuestions = 0;
 
-							// ===== OPTION CLICK =====
+							// Option click
 							$('.option-btn')
 									.click(
 											function() {
@@ -467,16 +375,13 @@ opacity
 												var points = $card
 														.data('points');
 
-												// Nếu đã trả lời rồi thì không cho chọn lại
 												if ($card.hasClass('answered')) {
 													return;
 												}
 
-												// Disable tất cả các option trong card này
 												$card.find('.option-btn').prop(
 														'disabled', true);
 
-												// Gọi API kiểm tra
 												$
 														.ajax({
 															url : '/api/quizzes/'
@@ -494,12 +399,10 @@ opacity
 																	var correctOption = response.correctOption;
 																	var explanation = response.explanation;
 
-																	// Đánh dấu đã trả lời
 																	$card
 																			.addClass('answered');
 																	answeredQuestions++;
 
-																	// Hiển thị đáp án đúng
 																	$card
 																			.find(
 																					'.option-btn')
@@ -519,7 +422,6 @@ opacity
 																						}
 																					});
 
-																	// Cập nhật feedback
 																	if (isCorrect) {
 																		$feedback
 																				.removeClass(
@@ -534,9 +436,6 @@ opacity
 																		correctCount++;
 																		$card
 																				.addClass('answered-correct');
-
-																		// Confetti effect
-																		createConfetti();
 																	} else {
 																		$feedback
 																				.removeClass(
@@ -550,7 +449,6 @@ opacity
 																				.addClass('answered-wrong');
 																	}
 
-																	// Hiển thị giải thích nếu có
 																	if (explanation) {
 																		$feedback
 																				.append('<br><small class="text-muted"><i class="fas fa-info-circle"></i> '
@@ -558,11 +456,9 @@ opacity
 																						+ '</small>');
 																	}
 
-																	// Hiển thị nút xem đáp án
 																	$showAnswerBtn
 																			.show();
 
-																	// Cập nhật điểm
 																	$(
 																			'#total-score')
 																			.text(
@@ -577,17 +473,14 @@ opacity
 																					totalQuestions
 																							- answeredQuestions);
 
-																	// Cập nhật progress
 																	updateProgress();
 
-																	// Kiểm tra hoàn thành
 																	if (answeredQuestions === totalQuestions) {
 																		showCompletionMessage();
 																	}
 																} else {
 																	alert(response.message
 																			|| 'Có lỗi xảy ra!');
-																	// Enable lại các option
 																	$card
 																			.find(
 																					'.option-btn')
@@ -608,7 +501,6 @@ opacity
 																				'Error:',
 																				error);
 																alert('Có lỗi xảy ra! Vui lòng thử lại.');
-																// Enable lại các option
 																$card
 																		.find(
 																				'.option-btn')
@@ -622,7 +514,7 @@ opacity
 														});
 											});
 
-							// ===== SHOW ANSWER =====
+							// Show answer
 							$('.show-answer-btn')
 									.click(
 											function() {
@@ -642,10 +534,8 @@ opacity
 												}
 											});
 
-							// ===== UPDATE PROGRESS =====
 							function updateProgress() {
 								var progress = (answeredQuestions / totalQuestions) * 100;
-								// Tạo hoặc cập nhật progress bar
 								if ($('#progress-bar').length === 0) {
 									var progressHtml = '<div class="progress mt-3" style="height: 8px; border-radius: 10px;">';
 									progressHtml += '<div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%; border-radius: 10px;"></div>';
@@ -655,38 +545,6 @@ opacity
 								$('#progress-bar').css('width', progress + '%');
 							}
 
-							// ===== CONFETTI =====
-							function createConfetti() {
-								var colors = [ '#ff6b6b', '#ffd93d', '#6bcb77',
-										'#4d96ff', '#ff6fb7', '#a66cff' ];
-								for (var i = 0; i < 50; i++) {
-									var confetti = $('<div class="confetti"></div>');
-									var color = colors[Math.floor(Math.random()
-											* colors.length)];
-									var left = Math.random() * 100;
-									var size = Math.random() * 8 + 6;
-									var duration = Math.random() * 2 + 2;
-									var delay = Math.random() * 1;
-
-									confetti.css({
-										'left' : left + '%',
-										'width' : size + 'px',
-										'height' : size + 'px',
-										'background' : color,
-										'animation-duration' : duration + 's',
-										'animation-delay' : delay + 's'
-									});
-
-									$('body').append(confetti);
-
-									// Tự động xóa sau khi animation kết thúc
-									setTimeout(function() {
-										confetti.remove();
-									}, (duration + delay) * 1000 + 100);
-								}
-							}
-
-							// ===== COMPLETION MESSAGE =====
 							function showCompletionMessage() {
 								var message = '<div class="alert alert-success text-center mt-4 animate__animated animate__bounceIn" style="border-radius: 20px;">';
 								message += '<h4 class="font-weight-bold">🎉 Chúc mừng bạn đã hoàn thành tất cả câu hỏi!</h4>';
@@ -702,11 +560,6 @@ opacity
 							}
 						});
 	</script>
-
-	<!-- Page-specific JavaScript -->
-	<c:if test="${not empty pageJs}">
-		<script src="${pageContext.request.contextPath}/assets/js/${pageJs}"></script>
-	</c:if>
 
 </body>
 </html>

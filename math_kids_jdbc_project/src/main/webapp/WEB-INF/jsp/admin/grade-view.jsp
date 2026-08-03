@@ -35,6 +35,8 @@ pageContext.setAttribute("pageTitle", "Chi tiết lớp học - Admin");
 	border-radius: 20px;
 	padding: 30px;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	max-width: 800px;
+	margin: 0 auto;
 }
 
 .detail-icon {
@@ -50,6 +52,7 @@ pageContext.setAttribute("pageTitle", "Chi tiết lớp học - Admin");
 	padding: 12px 0;
 	border-bottom: 1px solid #f0f2f5;
 	display: flex;
+	flex-wrap: wrap;
 }
 
 .detail-row:last-child {
@@ -72,6 +75,7 @@ pageContext.setAttribute("pageTitle", "Chi tiết lớp học - Admin");
 	display: flex;
 	gap: 10px;
 	flex-wrap: wrap;
+	justify-content: center;
 }
 </style>
 </head>
@@ -187,7 +191,7 @@ pageContext.setAttribute("pageTitle", "Chi tiết lớp học - Admin");
 
 						<!-- Actions -->
 						<div class="text-center mt-4 pt-3 border-top">
-							<div class="detail-actions justify-content-center">
+							<div class="detail-actions">
 								<a
 									href="${pageContext.request.contextPath}/admin/grades/edit/${grade.id}"
 									class="btn btn-warning btn-fun"> <i class="fas fa-edit"></i>
