@@ -1,5 +1,7 @@
 package com.kidsmath.model;
 
+import java.sql.Timestamp;
+
 public class Quiz {
 	private Integer id;
 	private Integer lessonId;
@@ -8,13 +10,19 @@ public class Quiz {
 	private String optionB;
 	private String optionC;
 	private String optionD;
-	private String correctOption;
+	private String correctOption; // 'A', 'B', 'C', 'D'
 	private String explanation;
-	private Integer points;
+	private Integer points; // default 10
+	private Timestamp createdAt;
+
+	// Thông tin bài học (phụ trợ)
+	private Lesson lesson;
 
 	public Quiz() {
+		this.points = 10; // default value
 	}
 
+	// Getters and Setters
 	public Integer getId() {
 		return id;
 	}
@@ -93,5 +101,38 @@ public class Quiz {
 
 	public void setPoints(Integer points) {
 		this.points = points;
+	}
+
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Timestamp createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	// Thêm getter và setter cho lesson
+	public Lesson getLesson() {
+		return lesson;
+	}
+
+	public void setLesson(Lesson lesson) {
+		this.lesson = lesson;
+	}
+
+	// Helper method để lấy text của đáp án đúng
+	public String getCorrectAnswerText() {
+		switch (correctOption) {
+		case "A":
+			return optionA;
+		case "B":
+			return optionB;
+		case "C":
+			return optionC;
+		case "D":
+			return optionD;
+		default:
+			return "";
+		}
 	}
 }

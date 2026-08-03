@@ -10,34 +10,66 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserDao userDao;
+	@Autowired
+	private UserDao userDao;
 
-    public List<User> findAll() {
-        return userDao.findAll();
-    }
+	public List<User> findAll() {
+		return userDao.findAll();
+	}
 
-    public User findById(Integer id) {
-        return userDao.findById(id);
-    }
+	public User findById(Integer id) {
+		return userDao.findById(id);
+	}
 
-    public User findByUsername(String username) {
-        return userDao.findByUsername(username);
-    }
+	public User findByUsername(String username) {
+		return userDao.findByUsername(username);
+	}
 
-    public int save(User user) {
-        return userDao.save(user);
-    }
+	public User findByEmail(String email) {
+		return userDao.findByEmail(email);
+	}
 
-    public int update(User user) {
-        return userDao.update(user);
-    }
+	// ===== THÊM PHƯƠNG THỨC NÀY =====
+	public boolean existsByUsername(String username) {
+		return userDao.existsByUsername(username);
+	}
 
-    public int deleteById(Integer id) {
-        return userDao.deleteById(id);
-    }
-    
-    public User findByEmail(String email) {
-        return userDao.findByEmail(email);
-    }
+	// ===== THÊM PHƯƠNG THỨC NÀY =====
+	public boolean existsByEmail(String email) {
+		return userDao.existsByEmail(email);
+	}
+
+	public void save(User user) {
+		userDao.save(user);
+	}
+
+	public void update(User user) {
+		userDao.update(user);
+	}
+
+	public void deleteById(Integer id) {
+		userDao.deleteById(id);
+	}
+
+	public void updateLastLogin(Integer id) {
+		userDao.updateLastLogin(id);
+	}
+
+	public long countByRole(String role) {
+		return userDao.countByRole(role);
+	}
+
+	public List<User> findByRole(String role) {
+		return userDao.findByRole(role);
+	}
+
+	public boolean changePassword(String username, String oldPassword, String newPassword) {
+		User user = findByUsername(username);
+		if (user != null && user.getPassword().equals(oldPassword)) {
+			user.setPassword(newPassword);
+			userDao.update(user);
+			return true;
+		}
+		return false;
+	}
 }
