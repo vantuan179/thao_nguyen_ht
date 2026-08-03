@@ -26,11 +26,6 @@ public class QuizRestController {
 		Map<String, Object> response = new HashMap<>();
 
 		try {
-			// Lấy user hiện tại từ session
-			User user = (User) session.getAttribute("currentUser");
-			Integer userId = (user != null) ? user.getId() : null;
-
-			// Tìm câu hỏi
 			Quiz quiz = quizService.findById(quizId);
 			if (quiz == null) {
 				response.put("success", false);
@@ -38,37 +33,17 @@ public class QuizRestController {
 				return response;
 			}
 
-			// Kiểm tra đáp án
 			boolean isCorrect = quiz.getCorrectOption().equalsIgnoreCase(option);
 
-			// Xây dựng response
 			response.put("success", true);
 			response.put("isCorrect", isCorrect);
 			response.put("correctOption", quiz.getCorrectOption());
-			response.put("explanation", quiz.getExplanation() != null ? quiz.getExplanation() : "Không có giải thích");
+			response.put("explanation", quiz.getExplanation());
 			response.put("points", isCorrect ? quiz.getPoints() : 0);
-
-			if (isCorrect) {
-				response.put("message", "🎉 Chính xác! Bạn đã trả lời đúng!");
-
-				// TODO: Lưu kết quả đúng vào database nếu có user
-				if (userId != null) {
-					// quizService.saveUserAnswer(userId, quizId, option, true);
-					// quizService.updateUserScore(userId, quiz.getPoints());
-				}
-			} else {
-				response.put("message", "❌ Chưa đúng! Đáp án đúng là " + quiz.getCorrectOption());
-
-				// TODO: Lưu kết quả sai vào database nếu có user
-				if (userId != null) {
-					// quizService.saveUserAnswer(userId, quizId, option, false);
-				}
-			}
 
 		} catch (Exception e) {
 			response.put("success", false);
-			response.put("message", "Có lỗi xảy ra: " + e.getMessage());
-			e.printStackTrace();
+			response.put("message", e.getMessage());
 		}
 
 		return response;
