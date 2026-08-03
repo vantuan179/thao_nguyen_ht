@@ -709,6 +709,11 @@ body {
 													return;
 												}
 
+												// ===== XÓA CLASS NOT-SELECTED CỦA LẦN KIỂM TRA TRƯỚC =====
+												$('.quiz-card.not-selected')
+														.removeClass(
+																'not-selected');
+
 												var unanswered = $('.quiz-card:not(.answered)');
 
 												if (unanswered.length === 0) {
