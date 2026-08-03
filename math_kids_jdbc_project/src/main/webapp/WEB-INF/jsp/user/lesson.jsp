@@ -399,7 +399,7 @@ body {
 
 	<div class="container py-4">
 		<!-- Back Button -->
-		<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
+		<a href="${pageContext.request.contextPath}/grades/${lesson.grade}"
 			class="btn btn-light rounded-pill mb-3 font-weight-bold shadow-sm">
 			<i class="fas fa-arrow-left"></i> Quay lại
 		</a>
