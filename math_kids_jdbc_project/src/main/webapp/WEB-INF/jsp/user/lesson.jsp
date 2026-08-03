@@ -60,24 +60,47 @@ body {
 	margin-bottom: 25px;
 	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 	border-left: 8px solid #e8f0fe;
-	transition: all 0.3s ease;
+	transition: none !important;
 }
 
-.quiz-card:hover {
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+/* VÔ HIỆU HÓA HOÀN TOÀN MỌI HIỆU ỨNG HOVER */
+.quiz-card:hover, .quiz-card:focus, .quiz-card:active {
+	transform: none !important;
+	transition: none !important;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
 }
 
+/* ===== CÂU ĐÃ CHỌN ĐÁP ÁN (CHƯA XÁC NHẬN) ===== */
+.quiz-card.selected {
+	background: #f0f7ff !important;
+	border-left-color: #667eea !important;
+	border-left-width: 10px !important;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15) !important;
+}
+
+.quiz-card.selected h4 {
+	color: #4a6cf7 !important;
+}
+
+/* ===== CÂU ĐÃ XÁC NHẬN - ĐÚNG ===== */
 .quiz-card.answered-correct {
-	border-left-color: #28a745;
+	background: #e8f5e9 !important;
+	border-left-color: #28a745 !important;
+	border-left-width: 10px !important;
 }
 
+/* ===== CÂU ĐÃ XÁC NHẬN - SAI ===== */
 .quiz-card.answered-wrong {
-	border-left-color: #dc3545;
+	background: #fce4ec !important;
+	border-left-color: #dc3545 !important;
+	border-left-width: 10px !important;
 }
 
+/* ===== CÂU ĐÃ XÁC NHẬN - BỎ QUA ===== */
 .quiz-card.answered-skipped {
-	border-left-color: #ffc107;
-	background: #fffbf0;
+	background: #fff8e1 !important;
+	border-left-color: #ffc107 !important;
+	border-left-width: 10px !important;
 }
 
 .option-btn {
@@ -315,9 +338,10 @@ body {
 	width: 0%;
 }
 
+/* ===== CÂU CHƯA CHỌN ĐÁP ÁN (KHI BẤM XÁC NHẬN) ===== */
 .quiz-card.not-selected {
-	border-left-color: #ff6b6b;
-	background: #fff5f5;
+	border-left-color: #ff6b6b !important;
+	background: #fff5f5 !important;
 }
 
 #confirmHint {
@@ -543,8 +567,8 @@ body {
 							var totalScore = 0;
 							var correctCount = 0;
 							var totalQuestions = $('.quiz-card').length;
-							var answeredCount = 0; // Số câu đã xác nhận
-							var selectedCount = 0; // Số câu đã chọn đáp án (chưa xác nhận)
+							var answeredCount = 0;
+							var selectedCount = 0;
 							var isChecking = false;
 							var isAllChecked = false;
 							var hasUserInteracted = false;
@@ -553,7 +577,6 @@ body {
 
 							// ===== CẬP NHẬT SỐ CÂU CÒN LẠI =====
 							function updateRemainingCount() {
-								// Còn = Tổng số câu - (Số câu đã xác nhận + Số câu đã chọn đáp án)
 								var remaining = totalQuestions
 										- (answeredCount + selectedCount);
 								$('#remaining-count').text(remaining);
@@ -594,9 +617,7 @@ body {
 									return;
 								}
 
-								// Kiểm tra xem còn câu nào chưa chọn đáp án không
 								var hasUnselected = false;
-								var unselectedCount = 0;
 								unanswered
 										.each(function() {
 											var $card = $(this);
@@ -604,7 +625,6 @@ body {
 													.find('.option-btn.selected-option').length > 0;
 											if (!hasSelected) {
 												hasUnselected = true;
-												unselectedCount++;
 											}
 										});
 
@@ -638,7 +658,6 @@ body {
 													return;
 												}
 
-												// Kiểm tra xem câu này đã được chọn đáp án chưa
 												var hadSelected = $card
 														.find('.option-btn.selected-option').length > 0;
 
@@ -648,15 +667,12 @@ body {
 																'selected-option');
 												$btn
 														.addClass('selected-option');
-												$card
-														.removeClass('not-selected');
 
-												// Nếu trước đó chưa chọn, tăng selectedCount
 												if (!hadSelected) {
+													$card.addClass('selected');
 													selectedCount++;
 												}
 
-												// Đánh dấu user đã tương tác
 												if (!hasUserInteracted) {
 													hasUserInteracted = true;
 												}
@@ -670,7 +686,6 @@ body {
 												console.log('Selected count:',
 														selectedCount);
 
-												// Cập nhật thông báo
 												updateRemainingCount();
 											});
 
@@ -701,7 +716,6 @@ body {
 													return;
 												}
 
-												// Kiểm tra câu nào chưa chọn đáp án
 												var hasUnselected = false;
 												var unselectedCards = [];
 												unanswered
@@ -739,7 +753,6 @@ body {
 													return;
 												}
 
-												// Tất cả đã chọn, tiến hành kiểm tra
 												isChecking = true;
 												$btn
 														.prop('disabled', true)
@@ -819,8 +832,10 @@ body {
 
 																				$card
 																						.addClass('answered');
+																				$card
+																						.removeClass('selected');
 																				answeredCount++;
-																				selectedCount--; // Giảm selectedCount vì đã chuyển sang answered
+																				selectedCount--;
 
 																				$card
 																						.find(
@@ -991,9 +1006,10 @@ body {
 
 																$card
 																		.addClass('answered answered-skipped');
+																$card
+																		.removeClass('selected');
 																answeredCount++;
 
-																// Nếu câu này đã được chọn đáp án thì giảm selectedCount
 																var hasSelected = $card
 																		.find('.option-btn.selected-option').length > 0;
 																if (hasSelected) {
