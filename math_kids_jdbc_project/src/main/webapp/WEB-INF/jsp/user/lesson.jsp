@@ -320,6 +320,14 @@ body {
 	background: #fff5f5;
 }
 
+#confirmHint {
+	min-height: 30px;
+}
+
+#confirmHint.empty-hint {
+	visibility: hidden;
+}
+
 @media ( max-width : 768px) {
 	.score-board {
 		top: 10px;
@@ -510,10 +518,7 @@ body {
 				style="display: none;">
 				<i class="fas fa-flag-checkered"></i> Hoàn thành bài kiểm tra
 			</button>
-			<p class="text-muted small mt-2" id="confirmHint">
-				<i class="fas fa-info-circle"></i> Chọn đáp án cho tất cả các câu
-				hỏi, sau đó nhấn "Xác nhận" để kiểm tra
-			</p>
+			<p class="text-muted small mt-2" id="confirmHint"></p>
 		</div>
 
 		<!-- Back to Lessons -->
@@ -538,63 +543,82 @@ body {
 							var totalScore = 0;
 							var correctCount = 0;
 							var totalQuestions = $('.quiz-card').length;
-							var answeredCount = 0;
+							var answeredCount = 0; // Số câu đã xác nhận
+							var selectedCount = 0; // Số câu đã chọn đáp án (chưa xác nhận)
 							var isChecking = false;
 							var isAllChecked = false;
+							var hasUserInteracted = false;
 
 							console.log('Total questions:', totalQuestions);
 
 							// ===== CẬP NHẬT SỐ CÂU CÒN LẠI =====
 							function updateRemainingCount() {
-								var remaining = totalQuestions - answeredCount;
+								// Còn = Tổng số câu - (Số câu đã xác nhận + Số câu đã chọn đáp án)
+								var remaining = totalQuestions
+										- (answeredCount + selectedCount);
 								$('#remaining-count').text(remaining);
 
-								var progress = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100
+								var progress = totalQuestions > 0 ? ((answeredCount + selectedCount) / totalQuestions) * 100
 										: 0;
 								$('#progressFill').css('width', progress + '%');
 
-								if (remaining > 0) {
-									if (isChecking) {
-										$('#confirmHint')
-												.html(
-														'<i class="fas fa-spinner fa-spin text-primary"></i> Đang kiểm tra câu trả lời...');
-									} else {
-										var unanswered = $('.quiz-card:not(.answered)').length;
-										$('#confirmHint')
-												.html(
-														'<i class="fas fa-info-circle"></i> Còn <strong>'
-																+ remaining
-																+ '</strong> câu chưa làm. Vui lòng chọn đáp án cho tất cả câu hỏi.');
-									}
-								} else {
+								if (!hasUserInteracted) {
+									$('#confirmHint').html('').addClass(
+											'empty-hint');
+									return;
+								}
+
+								$('#confirmHint').removeClass('empty-hint');
+
+								if (isAllChecked) {
+									$('#confirmHint')
+											.html(
+													'<i class="fas fa-trophy text-warning"></i> Bài kiểm tra đã hoàn thành!');
+									return;
+								}
+
+								if (isChecking) {
+									$('#confirmHint')
+											.html(
+													'<i class="fas fa-spinner fa-spin text-primary"></i> Đang kiểm tra câu trả lời...');
+									return;
+								}
+
+								var unanswered = $('.quiz-card:not(.answered)');
+
+								if (unanswered.length === 0) {
 									$('#confirmHint')
 											.html(
 													'<i class="fas fa-check-circle text-success"></i> Tất cả câu hỏi đã được trả lời! Nhấn "Hoàn thành" để kết thúc.');
 									$('#checkAllBtn').show();
+									return;
 								}
-							}
 
-							// ===== KIỂM TRA TẤT CẢ CÂU ĐÃ CHỌN ĐÁP ÁN CHƯA =====
-							function checkAllSelected() {
-								var unanswered = $('.quiz-card:not(.answered)');
-								var allSelected = true;
-								var notSelected = [];
-
+								// Kiểm tra xem còn câu nào chưa chọn đáp án không
+								var hasUnselected = false;
+								var unselectedCount = 0;
 								unanswered
 										.each(function() {
 											var $card = $(this);
 											var hasSelected = $card
 													.find('.option-btn.selected-option').length > 0;
 											if (!hasSelected) {
-												allSelected = false;
-												notSelected.push($card);
+												hasUnselected = true;
+												unselectedCount++;
 											}
 										});
 
-								return {
-									allSelected : allSelected,
-									notSelected : notSelected
-								};
+								if (!hasUnselected) {
+									$('#confirmHint')
+											.html(
+													'<i class="fas fa-check-circle text-success"></i> Tất cả câu hỏi đã được chọn đáp án! Nhấn "Xác nhận" để kiểm tra.');
+								} else {
+									$('#confirmHint')
+											.html(
+													'<i class="fas fa-info-circle"></i> Còn <strong>'
+															+ remaining
+															+ '</strong> câu chưa làm. Vui lòng chọn đáp án cho tất cả câu hỏi.');
+								}
 							}
 
 							// ===== CHỌN ĐÁP ÁN =====
@@ -614,6 +638,10 @@ body {
 													return;
 												}
 
+												// Kiểm tra xem câu này đã được chọn đáp án chưa
+												var hadSelected = $card
+														.find('.option-btn.selected-option').length > 0;
+
 												$card
 														.find('.option-btn')
 														.removeClass(
@@ -623,26 +651,27 @@ body {
 												$card
 														.removeClass('not-selected');
 
+												// Nếu trước đó chưa chọn, tăng selectedCount
+												if (!hadSelected) {
+													selectedCount++;
+												}
+
+												// Đánh dấu user đã tương tác
+												if (!hasUserInteracted) {
+													hasUserInteracted = true;
+												}
+
 												console
 														.log('Selected option for quiz '
 																+ quizId
 																+ ': '
 																+ $btn
 																		.data('option'));
+												console.log('Selected count:',
+														selectedCount);
 
-												var result = checkAllSelected();
-												if (result.allSelected) {
-													$('#confirmHint')
-															.html(
-																	'<i class="fas fa-check-circle text-success"></i> Tất cả câu hỏi đã được chọn đáp án! Nhấn "Xác nhận" để kiểm tra.');
-												} else {
-													var remaining = result.notSelected.length;
-													$('#confirmHint')
-															.html(
-																	'<i class="fas fa-info-circle"></i> Còn <strong>'
-																			+ remaining
-																			+ '</strong> câu chưa chọn đáp án. Vui lòng chọn đầy đủ.');
-												}
+												// Cập nhật thông báo
+												updateRemainingCount();
 											});
 
 							// ===== XÁC NHẬN TẤT CẢ CÂU TRẢ LỜI =====
@@ -652,11 +681,19 @@ body {
 											function() {
 												var $btn = $(this);
 
+												if (!hasUserInteracted) {
+													$('#confirmHint')
+															.removeClass(
+																	'empty-hint')
+															.html(
+																	'<i class="fas fa-info-circle"></i> Vui lòng chọn đáp án cho các câu hỏi trước!');
+													return;
+												}
+
 												if (isChecking || isAllChecked) {
 													return;
 												}
 
-												var result = checkAllSelected();
 												var unanswered = $('.quiz-card:not(.answered)');
 
 												if (unanswered.length === 0) {
@@ -664,9 +701,23 @@ body {
 													return;
 												}
 
-												// SỬA LỖI: Bọc notSelected trong jQuery
-												if (!result.allSelected) {
-													$(result.notSelected)
+												// Kiểm tra câu nào chưa chọn đáp án
+												var hasUnselected = false;
+												var unselectedCards = [];
+												unanswered
+														.each(function() {
+															var $card = $(this);
+															var hasSelected = $card
+																	.find('.option-btn.selected-option').length > 0;
+															if (!hasSelected) {
+																hasUnselected = true;
+																unselectedCards
+																		.push($card);
+															}
+														});
+
+												if (hasUnselected) {
+													$(unselectedCards)
 															.each(
 																	function() {
 																		$(this)
@@ -674,13 +725,12 @@ body {
 																						'not-selected');
 																	});
 
-													// Scroll đến câu đầu tiên chưa chọn
-													if (result.notSelected.length > 0) {
+													if (unselectedCards.length > 0) {
 														$('html, body')
 																.animate(
 																		{
 																			scrollTop : $(
-																					result.notSelected[0])
+																					unselectedCards[0])
 																					.offset().top - 150
 																		}, 500);
 													}
@@ -689,6 +739,7 @@ body {
 													return;
 												}
 
+												// Tất cả đã chọn, tiến hành kiểm tra
 												isChecking = true;
 												$btn
 														.prop('disabled', true)
@@ -769,6 +820,7 @@ body {
 																				$card
 																						.addClass('answered');
 																				answeredCount++;
+																				selectedCount--; // Giảm selectedCount vì đã chuyển sang answered
 
 																				$card
 																						.find(
@@ -941,6 +993,13 @@ body {
 																		.addClass('answered answered-skipped');
 																answeredCount++;
 
+																// Nếu câu này đã được chọn đáp án thì giảm selectedCount
+																var hasSelected = $card
+																		.find('.option-btn.selected-option').length > 0;
+																if (hasSelected) {
+																	selectedCount--;
+																}
+
 																$card
 																		.find(
 																				'.option-btn')
@@ -1046,7 +1105,7 @@ body {
 							}
 
 							// ===== KHỞI TẠO =====
-							updateRemainingCount();
+							$('#confirmHint').html('').addClass('empty-hint');
 							console.log('Lesson page initialized');
 							console.log('Total questions:', totalQuestions);
 							console.log('Quiz cards found:',
