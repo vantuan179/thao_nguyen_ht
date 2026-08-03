@@ -1,0 +1,188 @@
+package com.kidsmath.controller;
+
+import com.kidsmath.model.Grade;
+import com.kidsmath.service.GradeService;
+import com.kidsmath.service.LessonService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/admin/grades")
+public class GradeAdminController {
+
+	@Autowired
+	private GradeService gradeService;
+
+	@Autowired
+	private LessonService lessonService;
+
+	// ===== DANH SÁCH =====
+	@GetMapping
+	public String listGrades(Model model) {
+		List<Grade> grades = gradeService.findAll();
+		for (Grade grade : grades) {
+			// Đếm số bài học trong lớp
+			int lessonCount = lessonService.countByGrade(grade.getId());
+			grade.setLessons(null); // Không cần load full lessons
+		}
+		model.addAttribute("grades", grades);
+		model.addAttribute("totalGrades", gradeService.countAll());
+		model.addAttribute("activeGrades", gradeService.countActive());
+		return "admin/grade/list";
+	}
+
+	// ===== THÊM MỚI =====
+	@GetMapping("/create")
+	public String showCreateForm(Model model) {
+		model.addAttribute("grade", new Grade());
+		model.addAttribute("maxOrder", gradeService.getMaxDisplayOrder());
+		return "admin/grade/form";
+	}
+
+	@PostMapping("/create")
+	public String createGrade(@ModelAttribute Grade grade, RedirectAttributes redirectAttributes) {
+		try {
+			if (gradeService.existsByGradeName(grade.getGradeName())) {
+				redirectAttributes.addFlashAttribute("error", "Tên lớp '" + grade.getGradeName() + "' đã tồn tại!");
+				return "redirect:/admin/grades/create";
+			}
+			gradeService.save(grade);
+			redirectAttributes.addFlashAttribute("success", "Thêm lớp học '" + grade.getGradeName() + "' thành công!");
+			return "redirect:/admin/grades";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+			return "redirect:/admin/grades/create";
+		}
+	}
+
+	// ===== CẬP NHẬT =====
+	@GetMapping("/edit/{id}")
+	public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+		Grade grade = gradeService.findById(id);
+		if (grade == null) {
+			redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+			return "redirect:/admin/grades";
+		}
+		int lessonCount = lessonService.countByGrade(id);
+		model.addAttribute("grade", grade);
+		model.addAttribute("lessonCount", lessonCount);
+		return "admin/grade/form";
+	}
+
+	@PostMapping("/edit/{id}")
+	public String updateGrade(@PathVariable Integer id, @ModelAttribute Grade grade, RedirectAttributes redirectAttributes) {
+		try {
+			Grade existing = gradeService.findById(id);
+			if (existing == null) {
+				redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+				return "redirect:/admin/grades";
+			}
+
+			if (!existing.getGradeName().equals(grade.getGradeName()) && gradeService.existsByGradeName(grade.getGradeName())) {
+				redirectAttributes.addFlashAttribute("error", "Tên lớp '" + grade.getGradeName() + "' đã tồn tại!");
+				return "redirect:/admin/grades/edit/" + id;
+			}
+
+			grade.setId(id);
+			gradeService.update(grade);
+			redirectAttributes.addFlashAttribute("success", "Cập nhật lớp học '" + grade.getGradeName() + "' thành công!");
+			return "redirect:/admin/grades";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+			return "redirect:/admin/grades/edit/" + id;
+		}
+	}
+
+	// ===== XEM CHI TIẾT =====
+	@GetMapping("/view/{id}")
+	public String viewGrade(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+		Grade grade = gradeService.findById(id);
+		if (grade == null) {
+			redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+			return "redirect:/admin/grades";
+		}
+		int lessonCount = lessonService.countByGrade(id);
+		model.addAttribute("grade", grade);
+		model.addAttribute("lessonCount", lessonCount);
+		return "admin/grade/view";
+	}
+
+	// ===== TÌM KIẾM =====
+	@GetMapping("/search")
+	public String searchGrades(@RequestParam String keyword, Model model) {
+		List<Grade> grades = gradeService.searchByGradeName(keyword);
+		model.addAttribute("grades", grades);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("totalGrades", grades.size());
+		model.addAttribute("activeGrades", gradeService.countActive());
+		return "admin/grade/list";
+	}
+
+	// ===== VÔ HIỆU HÓA =====
+	@GetMapping("/soft-delete/{id}")
+	public String softDeleteGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+		Grade grade = gradeService.findById(id);
+		if (grade == null) {
+			redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+			return "redirect:/admin/grades";
+		}
+
+		if (!grade.getActive()) {
+			redirectAttributes.addFlashAttribute("warning", "Lớp học '" + grade.getGradeName() + "' đã bị vô hiệu hóa!");
+			return "redirect:/admin/grades";
+		}
+
+		gradeService.softDelete(id);
+		redirectAttributes.addFlashAttribute("success", "Đã vô hiệu hóa lớp học '" + grade.getGradeName() + "'!");
+		return "redirect:/admin/grades";
+	}
+
+	// ===== KHÔI PHỤC =====
+	@GetMapping("/restore/{id}")
+	public String restoreGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+		Grade grade = gradeService.findById(id);
+		if (grade == null) {
+			redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+			return "redirect:/admin/grades";
+		}
+
+		if (grade.getActive()) {
+			redirectAttributes.addFlashAttribute("warning", "Lớp học '" + grade.getGradeName() + "' đang hoạt động!");
+			return "redirect:/admin/grades";
+		}
+
+		grade.setActive(true);
+		gradeService.update(grade);
+		redirectAttributes.addFlashAttribute("success", "Đã khôi phục lớp học '" + grade.getGradeName() + "'!");
+		return "redirect:/admin/grades";
+	}
+
+	// ===== XÓA HẲN =====
+	@GetMapping("/delete/{id}")
+	public String deleteGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+		Grade grade = gradeService.findById(id);
+		if (grade == null) {
+			redirectAttributes.addFlashAttribute("error", "Không tìm thấy lớp học!");
+			return "redirect:/admin/grades";
+		}
+
+		int lessonCount = lessonService.countByGrade(id);
+		if (lessonCount > 0) {
+			redirectAttributes.addFlashAttribute("error", "Không thể xóa lớp '" + grade.getGradeName() + "' vì có " + lessonCount + " bài học thuộc lớp này!");
+			return "redirect:/admin/grades";
+		}
+
+		boolean deleted = gradeService.deleteById(id);
+		if (deleted) {
+			redirectAttributes.addFlashAttribute("success", "Đã xóa lớp học '" + grade.getGradeName() + "'!");
+		} else {
+			redirectAttributes.addFlashAttribute("error", "Không thể xóa lớp học '" + grade.getGradeName() + "'!");
+		}
+		return "redirect:/admin/grades";
+	}
+}

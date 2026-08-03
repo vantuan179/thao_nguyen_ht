@@ -1,19 +1,25 @@
 package com.kidsmath.model;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class Lesson {
 	private Integer id;
 	private String title;
 	private String description;
-	private Integer grade;
+	private Integer grade; // grade id (khớp với bảng lessons)
 	private String content;
 	private String videoUrl;
 	private Timestamp createdAt;
 
+	// Thông tin phụ trợ
+	private Grade gradeInfo; // Thông tin chi tiết về grade
+	private List<Quiz> quizzes; // Danh sách câu hỏi
+
 	public Lesson() {
 	}
 
+	// Getters and Setters
 	public Integer getId() {
 		return id;
 	}
@@ -68,5 +74,21 @@ public class Lesson {
 
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Grade getGradeInfo() {
+		return gradeInfo;
+	}
+
+	public void setGradeInfo(Grade gradeInfo) {
+		this.gradeInfo = gradeInfo;
+	}
+
+	public List<Quiz> getQuizzes() {
+		return quizzes;
+	}
+
+	public void setQuizzes(List<Quiz> quizzes) {
+		this.quizzes = quizzes;
 	}
 }
