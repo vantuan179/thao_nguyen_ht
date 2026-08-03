@@ -59,7 +59,7 @@ body {
 	padding: 25px;
 	margin-bottom: 25px;
 	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-	border-left: 8px solid #ffd93d;
+	border-left: 8px solid #e8f0fe;
 	transition: all 0.3s ease;
 }
 
@@ -76,6 +76,11 @@ body {
 	border-left-color: #dc3545;
 }
 
+.quiz-card.selected {
+	border-left-color: #667eea;
+	background: #f8f9ff;
+}
+
 .option-btn {
 	border-radius: 15px;
 	font-size: 1.1rem;
@@ -90,14 +95,20 @@ body {
 	text-align: left;
 }
 
-.option-btn:hover {
+.option-btn:hover:not(.disabled) {
 	transform: translateY(-2px);
 	background: #e8f0fe;
 	border-color: #667eea;
 	box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
 }
 
-.option-btn:disabled {
+.option-btn.selected-option {
+	border-color: #667eea;
+	background: #e8f0fe;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.option-btn.disabled {
 	cursor: not-allowed;
 	opacity: 0.7;
 }
@@ -108,10 +119,20 @@ body {
 	color: #155724;
 }
 
+.option-btn.correct:hover {
+	background: #d4edda;
+	transform: none;
+}
+
 .option-btn.wrong {
 	background: #f8d7da;
 	border-color: #dc3545;
 	color: #721c24;
+}
+
+.option-btn.wrong:hover {
+	background: #f8d7da;
+	transform: none;
 }
 
 .option-btn .option-label {
@@ -125,6 +146,10 @@ body {
 	color: #fff;
 	font-weight: 700;
 	margin-right: 10px;
+}
+
+.option-btn.selected-option .option-label {
+	background: #4a6cf7;
 }
 
 .option-btn.correct .option-label {
@@ -172,6 +197,60 @@ body {
 	background: #f8d7da;
 }
 
+.confirm-btn-wrapper {
+	text-align: center;
+	padding: 20px 0 10px 0;
+}
+
+.btn-confirm-answer {
+	border-radius: 50px;
+	padding: 15px 50px;
+	font-size: 1.2rem;
+	font-weight: 700;
+	background: linear-gradient(135deg, #667eea, #764ba2);
+	color: #fff;
+	border: none;
+	box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+	transition: all 0.3s ease;
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn-confirm-answer.active {
+	opacity: 1;
+	cursor: pointer;
+}
+
+.btn-confirm-answer.active:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+}
+
+.btn-confirm-answer:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.question-status {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	margin-left: 10px;
+}
+
+.question-status.unanswered {
+	background: #e8f0fe;
+}
+
+.question-status.answered-correct {
+	background: #28a745;
+}
+
+.question-status.answered-wrong {
+	background: #dc3545;
+}
+
 @media ( max-width : 768px) {
 	.score-board {
 		top: 10px;
@@ -191,6 +270,10 @@ body {
 	.option-btn {
 		font-size: 1rem;
 		padding: 12px 15px;
+	}
+	.btn-confirm-answer {
+		padding: 12px 30px;
+		font-size: 1rem;
 	}
 }
 </style>
@@ -260,12 +343,15 @@ body {
 					<c:forEach var="quiz" items="${quizzes}" varStatus="loop">
 						<div class="quiz-card animate__animated animate__zoomIn"
 							data-quiz-id="${quiz.id}" data-points="${quiz.points}"
+							data-index="${loop.index}"
 							style="animation-delay:${loop.index * 0.1}s">
 
 							<div class="d-flex align-items-start">
 								<span class="badge badge-primary badge-pill mr-3"
 									style="font-size: 1.2rem; padding: 8px 16px; min-width: 40px; background: linear-gradient(135deg, #667eea, #764ba2);">
-									${loop.index + 1} </span>
+									${loop.index + 1} <span class="question-status unanswered"
+									id="status-${quiz.id}"></span>
+								</span>
 								<div class="flex-grow-1">
 									<h4 class="font-weight-bold text-dark mb-3">${quiz.question}</h4>
 									<p class="text-muted small">
@@ -274,37 +360,43 @@ body {
 
 									<div class="row">
 										<div class="col-md-6">
-											<button class="option-btn" data-option="A">
+											<button class="option-btn" data-option="A"
+												data-quiz-id="${quiz.id}">
 												<span class="option-label">A</span> ${quiz.optionA}
 											</button>
 										</div>
 										<div class="col-md-6">
-											<button class="option-btn" data-option="B">
+											<button class="option-btn" data-option="B"
+												data-quiz-id="${quiz.id}">
 												<span class="option-label">B</span> ${quiz.optionB}
 											</button>
 										</div>
 										<div class="col-md-6">
-											<button class="option-btn" data-option="C">
+											<button class="option-btn" data-option="C"
+												data-quiz-id="${quiz.id}">
 												<span class="option-label">C</span> ${quiz.optionC}
 											</button>
 										</div>
 										<div class="col-md-6">
-											<button class="option-btn" data-option="D">
+											<button class="option-btn" data-option="D"
+												data-quiz-id="${quiz.id}">
 												<span class="option-label">D</span> ${quiz.optionD}
 											</button>
 										</div>
 									</div>
 
-									<div class="feedback mt-3 text-center"></div>
+									<div class="feedback mt-3 text-center" id="feedback-${quiz.id}"></div>
 
 									<div class="mt-2">
 										<button
 											class="btn btn-sm btn-outline-secondary show-answer-btn"
-											data-answer="${quiz.correctOption}" style="display: none;">
+											data-answer="${quiz.correctOption}" data-quiz-id="${quiz.id}"
+											style="display: none;">
 											<i class="fas fa-eye"></i> Xem đáp án
 										</button>
-										<span class="answer-text ml-2" style="display: none;">
-											<span class="badge badge-success">Đáp án đúng:
+										<span class="answer-text ml-2" style="display: none;"
+											id="answer-${quiz.id}"> <span
+											class="badge badge-success">Đáp án đúng:
 												${quiz.correctOption}</span> <c:if
 												test="${not empty quiz.explanation}">
 												<br>
@@ -332,8 +424,19 @@ body {
 			</c:choose>
 		</div>
 
+		<!-- Confirm Button -->
+		<div class="confirm-btn-wrapper">
+			<button class="btn-confirm-answer" id="confirmAnswerBtn" disabled>
+				<i class="fas fa-check-circle"></i> Xác nhận câu trả lời
+			</button>
+			<p class="text-muted small mt-2">
+				<i class="fas fa-info-circle"></i> Chọn đáp án rồi nhấn "Xác nhận"
+				để kiểm tra
+			</p>
+		</div>
+
 		<!-- Back to Lessons -->
-		<div class="text-center mt-4">
+		<div class="text-center mt-2">
 			<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
 				class="btn btn-outline-primary btn-fun"> <i
 				class="fas fa-arrow-left"></i> Quay lại danh sách bài học
@@ -354,38 +457,93 @@ body {
 							var correctCount = 0;
 							var totalQuestions = $('.quiz-card').length;
 							var answeredQuestions = 0;
+							var selectedOption = null;
+							var selectedQuizId = null;
 
-							// Option click
+							// ===== CHỌN ĐÁP ÁN =====
 							$('.option-btn')
 									.click(
 											function() {
 												var $btn = $(this);
 												var $card = $btn
 														.closest('.quiz-card');
-												var $feedback = $card
-														.find('.feedback');
-												var $showAnswerBtn = $card
-														.find('.show-answer-btn');
-												var $answerText = $card
-														.find('.answer-text');
-												var quizId = $card
+												var quizId = $btn
 														.data('quiz-id');
-												var selectedOption = $btn
-														.data('option');
-												var points = $card
-														.data('points');
 
+												// Nếu đã trả lời rồi thì không cho chọn lại
 												if ($card.hasClass('answered')) {
 													return;
 												}
 
-												$card.find('.option-btn').prop(
-														'disabled', true);
+												// Bỏ chọn tất cả các option trong card này
+												$card
+														.find('.option-btn')
+														.removeClass(
+																'selected-option');
 
+												// Chọn option hiện tại
+												$btn
+														.addClass('selected-option');
+
+												// Lưu lựa chọn
+												selectedOption = $btn
+														.data('option');
+												selectedQuizId = quizId;
+
+												// Kích hoạt nút xác nhận
+												$('#confirmAnswerBtn').prop(
+														'disabled', false)
+														.addClass('active');
+
+												// Highlight card đã chọn
+												$('.quiz-card').removeClass(
+														'selected');
+												$card.addClass('selected');
+											});
+
+							// ===== XÁC NHẬN CÂU TRẢ LỜI =====
+							$('#confirmAnswerBtn')
+									.click(
+											function() {
+												var $btn = $(this);
+
+												if ($btn.prop('disabled')) {
+													return;
+												}
+
+												if (!selectedOption
+														|| !selectedQuizId) {
+													alert('Vui lòng chọn đáp án trước!');
+													return;
+												}
+
+												var $card = $('.quiz-card[data-quiz-id="'
+														+ selectedQuizId + '"]');
+												var $feedback = $('#feedback-'
+														+ selectedQuizId);
+												var $showAnswerBtn = $card
+														.find('.show-answer-btn');
+												var $answerText = $('#answer-'
+														+ selectedQuizId);
+												var points = $card
+														.data('points');
+												var $status = $('#status-'
+														+ selectedQuizId);
+
+												// Disable nút xác nhận
+												$btn.prop('disabled', true)
+														.removeClass('active');
+
+												// Disable tất cả các option trong card này
+												$card.find('.option-btn')
+														.addClass('disabled')
+														.prop('disabled', true);
+
+												// Gọi API kiểm tra
 												$
 														.ajax({
 															url : '/api/quizzes/'
-																	+ quizId
+																	+ selectedQuizId
 																	+ '/answer',
 															type : 'POST',
 															data : {
@@ -399,10 +557,12 @@ body {
 																	var correctOption = response.correctOption;
 																	var explanation = response.explanation;
 
+																	// Đánh dấu đã trả lời
 																	$card
 																			.addClass('answered');
 																	answeredQuestions++;
 
+																	// Highlight đáp án đúng và sai
 																	$card
 																			.find(
 																					'.option-btn')
@@ -422,6 +582,7 @@ body {
 																						}
 																					});
 
+																	// Cập nhật feedback
 																	if (isCorrect) {
 																		$feedback
 																				.removeClass(
@@ -436,6 +597,11 @@ body {
 																		correctCount++;
 																		$card
 																				.addClass('answered-correct');
+																		$status
+																				.removeClass(
+																						'unanswered')
+																				.addClass(
+																						'answered-correct');
 																	} else {
 																		$feedback
 																				.removeClass(
@@ -447,8 +613,14 @@ body {
 																						+ correctOption);
 																		$card
 																				.addClass('answered-wrong');
+																		$status
+																				.removeClass(
+																						'unanswered')
+																				.addClass(
+																						'answered-wrong');
 																	}
 
+																	// Hiển thị giải thích
 																	if (explanation) {
 																		$feedback
 																				.append('<br><small class="text-muted"><i class="fas fa-info-circle"></i> '
@@ -456,9 +628,11 @@ body {
 																						+ '</small>');
 																	}
 
+																	// Hiển thị nút xem đáp án
 																	$showAnswerBtn
 																			.show();
 
+																	// Cập nhật điểm
 																	$(
 																			'#total-score')
 																			.text(
@@ -473,23 +647,44 @@ body {
 																					totalQuestions
 																							- answeredQuestions);
 
+																	// Cập nhật progress
 																	updateProgress();
 
+																	// Reset lựa chọn
+																	selectedOption = null;
+																	selectedQuizId = null;
+
+																	// Kiểm tra hoàn thành
 																	if (answeredQuestions === totalQuestions) {
 																		showCompletionMessage();
+																		$(
+																				'#confirmAnswerBtn')
+																				.prop(
+																						'disabled',
+																						true);
 																	}
 																} else {
 																	alert(response.message
 																			|| 'Có lỗi xảy ra!');
+																	// Enable lại các option
 																	$card
 																			.find(
 																					'.option-btn')
+																			.removeClass(
+																					'disabled')
 																			.prop(
 																					'disabled',
 																					false);
 																	$card
 																			.removeClass('answered');
 																	answeredQuestions--;
+																	$(
+																			'#confirmAnswerBtn')
+																			.prop(
+																					'disabled',
+																					false)
+																			.addClass(
+																					'active');
 																}
 															},
 															error : function(
@@ -501,26 +696,37 @@ body {
 																				'Error:',
 																				error);
 																alert('Có lỗi xảy ra! Vui lòng thử lại.');
+																// Enable lại các option
 																$card
 																		.find(
 																				'.option-btn')
+																		.removeClass(
+																				'disabled')
 																		.prop(
 																				'disabled',
 																				false);
 																$card
 																		.removeClass('answered');
 																answeredQuestions--;
+																$(
+																		'#confirmAnswerBtn')
+																		.prop(
+																				'disabled',
+																				false)
+																		.addClass(
+																				'active');
 															}
 														});
 											});
 
-							// Show answer
+							// ===== HIỂN THỊ ĐÁP ÁN =====
 							$('.show-answer-btn')
 									.click(
 											function() {
-												var $answerText = $(this)
-														.siblings(
-																'.answer-text');
+												var quizId = $(this).data(
+														'quiz-id');
+												var $answerText = $('#answer-'
+														+ quizId);
 												if ($answerText.is(':visible')) {
 													$answerText.slideUp();
 													$(this)
@@ -534,6 +740,7 @@ body {
 												}
 											});
 
+							// ===== CẬP NHẬT PROGRESS =====
 							function updateProgress() {
 								var progress = (answeredQuestions / totalQuestions) * 100;
 								if ($('#progress-bar').length === 0) {
@@ -545,6 +752,7 @@ body {
 								$('#progress-bar').css('width', progress + '%');
 							}
 
+							// ===== HOÀN THÀNH =====
 							function showCompletionMessage() {
 								var message = '<div class="alert alert-success text-center mt-4 animate__animated animate__bounceIn" style="border-radius: 20px;">';
 								message += '<h4 class="font-weight-bold">🎉 Chúc mừng bạn đã hoàn thành tất cả câu hỏi!</h4>';
