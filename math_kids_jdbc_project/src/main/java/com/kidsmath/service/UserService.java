@@ -84,4 +84,8 @@ public class UserService {
 		}
 		return emails;
 	}
+
+	public List<User> searchByUsername(String keyword) {
+		return userDao.searchByUsername(keyword);
+	}
 }

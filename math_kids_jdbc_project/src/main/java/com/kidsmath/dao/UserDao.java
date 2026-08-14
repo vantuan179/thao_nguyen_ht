@@ -88,4 +88,10 @@ public class UserDao {
 		String sql = "SELECT id, username, password, full_name, email, role, created_at FROM users WHERE role = ? ORDER BY id";
 		return jdbcTemplate.query(sql, new UserRowMapper(), role);
 	}
+
+	public List<User> searchByUsername(String keyword) {
+		String sql = "SELECT id, username, password, full_name, email, role, created_at " + "FROM users WHERE LOWER(username) LIKE LOWER(?) OR LOWER(full_name) LIKE LOWER(?) " + "ORDER BY id";
+		String searchKeyword = "%" + keyword + "%";
+		return jdbcTemplate.query(sql, new UserRowMapper(), searchKeyword, searchKeyword);
+	}
 }
