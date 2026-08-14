@@ -97,7 +97,7 @@ pageContext.setAttribute("pageTitle", "Quản trị - Bé Học Toán");
 
 				<!-- Header -->
 				<div
-					class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+					class="admin-header d-flex justify-content-between align-items-center mb-4 flex-wrap">
 					<div>
 						<h2 class="font-weight-bold text-primary mb-0">
 							<i class="fas fa-chart-pie"></i> Bảng điều khiển

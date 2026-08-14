@@ -191,7 +191,7 @@ pageContext.setAttribute("pageTitle", "Quản lý Email - Admin");
 			<main class="col-md-10 admin-content">
 				<!-- Header -->
 				<div
-					class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+					class="admin-header d-flex justify-content-between align-items-center mb-4 flex-wrap">
 					<div>
 						<h2 class="font-weight-bold text-primary mb-0">
 							<i class="fas fa-envelope"></i> Quản lý Email
