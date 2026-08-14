@@ -78,6 +78,18 @@ pageContext.setAttribute("pageTitle", "Quản trị - Bé Học Toán");
 				</a> <a href="${pageContext.request.contextPath}/logout"
 					class="nav-link"> <i class="fas fa-sign-out-alt"></i> Đăng xuất
 				</a>
+
+				<div class="nav-section">Email</div>
+				<a href="${pageContext.request.contextPath}/admin/email"
+					class="nav-link"> <i class="fas fa-envelope"></i> Quản lý Email
+					<span class="badge">${totalEmails}</span>
+				</a> <a href="${pageContext.request.contextPath}/admin/email/send"
+					class="nav-link"> <i class="fas fa-paper-plane"></i> Gửi Email
+				</a> <a href="${pageContext.request.contextPath}/admin/email/templates"
+					class="nav-link"> <i class="fas fa-file-alt"></i> Mẫu Email
+				</a> <a href="${pageContext.request.contextPath}/admin/email/history"
+					class="nav-link"> <i class="fas fa-history"></i> Lịch sử
+				</a>
 			</nav>
 
 			<!-- ===== MAIN CONTENT ===== -->
@@ -124,7 +136,7 @@ pageContext.setAttribute("pageTitle", "Quản trị - Bé Học Toán");
 							<div class="info">
 								<div class="label">Bài học</div>
 								<div class="number">${totalLessons}</div>
-								<div class="sub">${totalGrades}lớp học</div>
+								<div class="sub">${totalGrades}lớphọc</div>
 							</div>
 						</div>
 					</div>

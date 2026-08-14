@@ -5,6 +5,7 @@ import com.kidsmath.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -71,5 +72,16 @@ public class UserService {
 			return true;
 		}
 		return false;
+	}
+
+	public List<String> getAllEmails() {
+		List<User> users = userDao.findAll();
+		List<String> emails = new ArrayList<>();
+		for (User user : users) {
+			if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+				emails.add(user.getEmail());
+			}
+		}
+		return emails;
 	}
 }

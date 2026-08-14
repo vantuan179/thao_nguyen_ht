@@ -3,7 +3,15 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <%
-String title = grade.getId() == null ? "Thêm lớp học mới" : "Cập nhật lớp học";
+// Kiểm tra grade có tồn tại không trước khi dùng
+String title = "Thêm lớp học mới";
+Object gradeObj = request.getAttribute("grade");
+if (gradeObj != null) {
+	com.kidsmath.model.Grade grade = (com.kidsmath.model.Grade) gradeObj;
+	if (grade.getId() != null) {
+		title = "Cập nhật lớp học";
+	}
+}
 pageContext.setAttribute("pageTitle", title + " - Admin");
 %>
 
@@ -69,10 +77,11 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 						class="form-header d-flex justify-content-between align-items-center">
 						<div>
 							<h3 class="text-primary mb-0">
-								<i class="fas fa-${grade.id == null ? 'plus-circle' : 'edit'}"></i>
-								${grade.id == null ? 'Thêm lớp học mới' : 'Cập nhật lớp học'}
+								<i
+									class="fas fa-${grade == null || grade.id == null ? 'plus-circle' : 'edit'}"></i>
+								${grade == null || grade.id == null ? 'Thêm lớp học mới' : 'Cập nhật lớp học'}
 							</h3>
-							<c:if test="${grade.id != null}">
+							<c:if test="${grade != null && grade.id != null}">
 								<small class="text-muted">ID: ${grade.id}</small>
 							</c:if>
 						</div>
@@ -91,14 +100,15 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 
 					<!-- Form -->
 					<form
-						action="${pageContext.request.contextPath}/admin/grades/${grade.id == null ? 'create' : 'edit/' += grade.id}"
+						action="${pageContext.request.contextPath}/admin/grades/${grade == null || grade.id == null ? 'create' : 'edit/' += grade.id}"
 						method="POST">
 
 						<!-- Tên lớp -->
 						<div class="form-group">
 							<label class="form-label"><i class="fas fa-tag"></i> Tên
 								lớp <span class="text-danger">*</span></label> <input type="text"
-								name="gradeName" class="form-control" value="${grade.gradeName}"
+								name="gradeName" class="form-control"
+								value="${grade != null ? grade.gradeName : ''}"
 								placeholder="Ví dụ: Lớp 1, Lớp 2..." required> <small
 								class="text-muted">Tên lớp phải là duy nhất</small>
 						</div>
@@ -109,39 +119,46 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 								Biểu tượng</label>
 							<div class="icon-selector" id="iconSelector">
 								<div
-									class="icon-option ${grade.icon == '1️⃣' ? 'selected' : ''}"
+									class="icon-option ${grade != null && grade.icon == '1️⃣' ? 'selected' : ''}"
 									data-icon="1️⃣">1️⃣</div>
 								<div
-									class="icon-option ${grade.icon == '2️⃣' ? 'selected' : ''}"
+									class="icon-option ${grade != null && grade.icon == '2️⃣' ? 'selected' : ''}"
 									data-icon="2️⃣">2️⃣</div>
 								<div
-									class="icon-option ${grade.icon == '3️⃣' ? 'selected' : ''}"
+									class="icon-option ${grade != null && grade.icon == '3️⃣' ? 'selected' : ''}"
 									data-icon="3️⃣">3️⃣</div>
 								<div
-									class="icon-option ${grade.icon == '4️⃣' ? 'selected' : ''}"
+									class="icon-option ${grade != null && grade.icon == '4️⃣' ? 'selected' : ''}"
 									data-icon="4️⃣">4️⃣</div>
 								<div
-									class="icon-option ${grade.icon == '5️⃣' ? 'selected' : ''}"
+									class="icon-option ${grade != null && grade.icon == '5️⃣' ? 'selected' : ''}"
 									data-icon="5️⃣">5️⃣</div>
-								<div class="icon-option ${grade.icon == '📚' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '📚' ? 'selected' : ''}"
 									data-icon="📚">📚</div>
-								<div class="icon-option ${grade.icon == '🎓' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '🎓' ? 'selected' : ''}"
 									data-icon="🎓">🎓</div>
-								<div class="icon-option ${grade.icon == '⭐' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '⭐' ? 'selected' : ''}"
 									data-icon="⭐">⭐</div>
-								<div class="icon-option ${grade.icon == '🌈' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '🌈' ? 'selected' : ''}"
 									data-icon="🌈">🌈</div>
-								<div class="icon-option ${grade.icon == '🌟' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '🌟' ? 'selected' : ''}"
 									data-icon="🌟">🌟</div>
-								<div class="icon-option ${grade.icon == '📖' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '📖' ? 'selected' : ''}"
 									data-icon="📖">📖</div>
-								<div class="icon-option ${grade.icon == '✏️' ? 'selected' : ''}"
+								<div
+									class="icon-option ${grade != null && grade.icon == '✏️' ? 'selected' : ''}"
 									data-icon="✏️">✏️</div>
 							</div>
 							<input type="hidden" name="icon" id="selectedIcon"
-								value="${grade.icon != null ? grade.icon : '📚'}">
+								value="${grade != null ? grade.icon : '📚'}">
 							<div class="mt-2">
-								<span class="preview-icon" id="iconPreview">${grade.icon != null ? grade.icon : '📚'}</span>
+								<span class="preview-icon" id="iconPreview">${grade != null ? grade.icon : '📚'}</span>
 								<span class="text-muted ml-2">Biểu tượng sẽ hiển thị trên
 									trang chủ</span>
 							</div>
@@ -152,7 +169,7 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 							<label class="form-label"><i class="fas fa-align-left"></i>
 								Mô tả</label>
 							<textarea name="description" class="form-control" rows="3"
-								placeholder="Mô tả ngắn về lớp học này">${grade.description}</textarea>
+								placeholder="Mô tả ngắn về lớp học này">${grade != null ? grade.description : ''}</textarea>
 						</div>
 
 						<!-- Thứ tự hiển thị -->
@@ -160,7 +177,7 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 							<label class="form-label"><i class="fas fa-sort"></i> Thứ
 								tự hiển thị</label> <input type="number" name="displayOrder"
 								class="form-control"
-								value="${grade.displayOrder != null ? grade.displayOrder : maxOrder + 1}"
+								value="${grade != null && grade.displayOrder != null ? grade.displayOrder : maxOrder + 1}"
 								min="1" step="1"> <small class="text-muted">Số
 								nhỏ hơn sẽ hiển thị trước</small>
 						</div>
@@ -172,9 +189,9 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 							<div class="custom-control custom-switch">
 								<input type="checkbox" class="custom-control-input" id="active"
 									name="active"
-									${grade.active != null && !grade.active ? '' : 'checked'}
+									${grade == null || grade.active == null || grade.active ? 'checked' : ''}
 									value="true"> <label class="custom-control-label"
-									for="active"> <span id="statusLabel">${grade.active != null && !grade.active ? 'Vô hiệu hóa' : 'Hoạt động'}</span>
+									for="active"> <span id="statusLabel">${grade == null || grade.active == null || grade.active ? 'Hoạt động' : 'Vô hiệu hóa'}</span>
 								</label>
 							</div>
 						</div>
@@ -182,8 +199,9 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 						<!-- Nút submit -->
 						<div class="text-center mt-4">
 							<button type="submit" class="btn btn-primary btn-fun">
-								<i class="fas fa-${grade.id == null ? 'plus' : 'save'}"></i>
-								${grade.id == null ? 'Thêm lớp học' : 'Cập nhật'}
+								<i
+									class="fas fa-${grade == null || grade.id == null ? 'plus' : 'save'}"></i>
+								${grade == null || grade.id == null ? 'Thêm lớp học' : 'Cập nhật'}
 							</button>
 							<a href="${pageContext.request.contextPath}/admin/grades"
 								class="btn btn-outline-secondary btn-fun ml-2"> <i
@@ -192,7 +210,7 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 						</div>
 					</form>
 
-					<c:if test="${grade.id != null}">
+					<c:if test="${grade != null && grade.id != null}">
 						<hr>
 						<div class="text-center text-muted small">
 							<i class="fas fa-info-circle"></i> Lớp học có ${lessonCount} bài
