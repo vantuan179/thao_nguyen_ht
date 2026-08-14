@@ -2,10 +2,6 @@ package com.kidsmath.controller;
 
 import com.kidsmath.model.Lesson;
 import com.kidsmath.model.Grade;
-import com.kidsmath.service.LessonService;
-import com.kidsmath.service.GradeService;
-import com.kidsmath.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +11,8 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/lessons")
-public class LessonAdminController {
+public class LessonAdminController extends BaseController {
 
-	@Autowired
-	private LessonService lessonService;
-
-	@Autowired
-	private GradeService gradeService;
-
-	@Autowired
-	private QuizService quizService;
-
-	// ===== DANH SÁCH BÀI HỌC =====
 	@GetMapping
 	public String listLessons(Model model) {
 		try {
@@ -35,8 +21,6 @@ public class LessonAdminController {
 
 			model.addAttribute("lessons", lessons);
 			model.addAttribute("grades", grades);
-			model.addAttribute("totalLessons", lessons != null ? lessons.size() : 0);
-
 			return "admin/lesson-list";
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -45,7 +29,6 @@ public class LessonAdminController {
 		}
 	}
 
-	// ===== FORM THÊM BÀI HỌC =====
 	@GetMapping("/add")
 	public String showAddForm(Model model) {
 		List<Grade> grades = gradeService.findAll();
@@ -66,7 +49,6 @@ public class LessonAdminController {
 		}
 	}
 
-	// ===== FORM SỬA BÀI HỌC =====
 	@GetMapping("/edit/{id}")
 	public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
 		try {
@@ -101,7 +83,6 @@ public class LessonAdminController {
 		}
 	}
 
-	// ===== XÓA BÀI HỌC =====
 	@GetMapping("/delete/{id}")
 	public String deleteLesson(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 		try {

@@ -2,9 +2,6 @@ package com.kidsmath.controller;
 
 import com.kidsmath.model.Lesson;
 import com.kidsmath.model.Quiz;
-import com.kidsmath.service.LessonService;
-import com.kidsmath.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +11,8 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/quizzes")
-public class QuizAdminController {
+public class QuizAdminController extends BaseController {
 
-	@Autowired
-	private QuizService quizService;
-
-	@Autowired
-	private LessonService lessonService;
-
-	// ===== DANH SÁCH CÂU HỎI =====
 	@GetMapping
 	public String listQuizzes(Model model) {
 		try {
@@ -31,8 +21,6 @@ public class QuizAdminController {
 
 			model.addAttribute("quizzes", quizzes);
 			model.addAttribute("lessons", lessons);
-			model.addAttribute("totalQuizzes", quizzes != null ? quizzes.size() : 0);
-
 			return "admin/quiz-list";
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -41,7 +29,6 @@ public class QuizAdminController {
 		}
 	}
 
-	// ===== FORM THÊM CÂU HỎI =====
 	@GetMapping("/add")
 	public String showAddForm(Model model) {
 		List<Lesson> lessons = lessonService.findAll();
@@ -62,7 +49,6 @@ public class QuizAdminController {
 		}
 	}
 
-	// ===== FORM SỬA CÂU HỎI =====
 	@GetMapping("/edit/{id}")
 	public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
 		try {
@@ -95,7 +81,6 @@ public class QuizAdminController {
 		}
 	}
 
-	// ===== XÓA CÂU HỎI =====
 	@GetMapping("/delete/{id}")
 	public String deleteQuiz(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 		try {

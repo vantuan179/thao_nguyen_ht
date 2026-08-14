@@ -8,15 +8,13 @@ import com.kidsmath.service.GradeService;
 import com.kidsmath.service.LessonService;
 import com.kidsmath.service.QuizService;
 import com.kidsmath.service.UserService;
-
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @Controller
@@ -37,40 +35,25 @@ public class UserController {
 	// ===== HOME - Hiển thị danh sách lớp học =====
 	@GetMapping("/")
 	public String home(Model model) {
-		System.out.println("=== HOME PAGE CALLED ===");
-
-		// Lấy danh sách lớp học đang hoạt động
 		List<Grade> grades = gradeService.findActiveGrades();
-		System.out.println("Found grades: " + (grades != null ? grades.size() : 0));
-
-		// Lấy số lượng bài học cho mỗi lớp
 		for (Grade grade : grades) {
 			List<Lesson> lessons = lessonService.findByGrade(grade.getId());
 			grade.setLessons(lessons);
-			System.out.println("Grade " + grade.getId() + " has " + (lessons != null ? lessons.size() : 0) + " lessons");
 		}
-
 		model.addAttribute("grades", grades);
-		return "user/home"; // Trả về trang home.jsp
+		return "user/home";
 	}
 
 	// ===== LESSON DETAIL =====
 	@GetMapping("/lesson/{id}")
 	public String lessonDetail(@PathVariable("id") Integer id, Model model) {
-		System.out.println("=== LESSON DETAIL CALLED ===");
-		System.out.println("Lesson ID: " + id);
-
 		Lesson lesson = lessonService.findById(id);
 		if (lesson == null) {
-			System.out.println("Lesson not found for ID: " + id);
 			return "redirect:/";
 		}
 
 		List<Quiz> quizzes = quizService.findByLessonId(id);
 		int totalPoints = quizService.getTotalPointsByLessonId(id);
-
-		System.out.println("Found quizzes: " + (quizzes != null ? quizzes.size() : 0));
-		System.out.println("Total points: " + totalPoints);
 
 		model.addAttribute("lesson", lesson);
 		model.addAttribute("quizzes", quizzes);
@@ -90,7 +73,8 @@ public class UserController {
 		User user = userService.findByUsername(username);
 		if (user != null && user.getPassword().equals(password)) {
 			session.setAttribute("currentUser", user);
-			userService.updateLastLogin(user.getId());
+			// userService.updateLastLogin(user.getId()); // Comment nếu chưa có cột
+			// last_login
 			if ("ADMIN".equals(user.getRole())) {
 				return "redirect:/admin";
 			}

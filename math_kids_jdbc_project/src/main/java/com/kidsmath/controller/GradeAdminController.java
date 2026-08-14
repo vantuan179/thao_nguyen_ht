@@ -1,9 +1,6 @@
 package com.kidsmath.controller;
 
 import com.kidsmath.model.Grade;
-import com.kidsmath.service.GradeService;
-import com.kidsmath.service.LessonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,35 +10,21 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/grades")
-public class GradeAdminController {
+public class GradeAdminController extends BaseController {
 
-	@Autowired
-	private GradeService gradeService;
-
-	@Autowired
-	private LessonService lessonService;
-
-	// ===== DANH SÁCH =====
 	@GetMapping
 	public String listGrades(Model model) {
-		System.out.println("=== LIST GRADES CALLED ===");
 		try {
 			List<Grade> grades = gradeService.findAll();
-			System.out.println("Found grades: " + (grades != null ? grades.size() : 0));
-
 			model.addAttribute("grades", grades);
-			model.addAttribute("totalGrades", gradeService.countAll());
-			model.addAttribute("activeGrades", gradeService.countActive());
 			return "admin/grade-list";
 		} catch (Exception e) {
-			System.out.println("Error in listGrades: " + e.getMessage());
 			e.printStackTrace();
 			model.addAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
 			return "admin/grade-list";
 		}
 	}
 
-	// ===== THÊM MỚI =====
 	@GetMapping("/create")
 	public String showCreateForm(Model model) {
 		model.addAttribute("grade", new Grade());
@@ -65,7 +48,6 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== CẬP NHẬT =====
 	@GetMapping("/edit/{id}")
 	public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
 		try {
@@ -107,7 +89,6 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== XEM CHI TIẾT =====
 	@GetMapping("/view/{id}")
 	public String viewGrade(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
 		try {
@@ -125,7 +106,6 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== XÓA =====
 	@GetMapping("/delete/{id}")
 	public String deleteGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 		try {
@@ -154,15 +134,12 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== TÌM KIẾM =====
 	@GetMapping("/search")
 	public String searchGrades(@RequestParam String keyword, Model model) {
 		try {
 			List<Grade> grades = gradeService.searchByGradeName(keyword);
 			model.addAttribute("grades", grades);
 			model.addAttribute("keyword", keyword);
-			model.addAttribute("totalGrades", grades.size());
-			model.addAttribute("activeGrades", gradeService.countActive());
 			return "admin/grade-list";
 		} catch (Exception e) {
 			model.addAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
@@ -170,7 +147,6 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== VÔ HIỆU HÓA =====
 	@GetMapping("/soft-delete/{id}")
 	public String softDeleteGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 		try {
@@ -194,7 +170,6 @@ public class GradeAdminController {
 		}
 	}
 
-	// ===== KHÔI PHỤC =====
 	@GetMapping("/restore/{id}")
 	public String restoreGrade(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 		try {
