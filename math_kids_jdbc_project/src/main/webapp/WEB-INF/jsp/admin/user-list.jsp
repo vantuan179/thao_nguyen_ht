@@ -27,35 +27,8 @@ pageContext.setAttribute("pageTitle", "Quản lý người dùng - Admin");
 
 	<div class="container-fluid p-0">
 		<div class="row no-gutters">
-			<!-- Sidebar -->
-			<nav class="col-md-2 admin-sidebar">
-				<div class="admin-sidebar-brand">
-					<h4>🧮 Admin</h4>
-					<small>Bé Học Toán</small>
-				</div>
-				<div class="nav-section">Điều hướng</div>
-				<a href="${pageContext.request.contextPath}/admin" class="nav-link">
-					<i class="fas fa-chart-pie"></i> Tổng quan
-				</a>
-				<div class="nav-section">Quản lý</div>
-				<a href="${pageContext.request.contextPath}/admin/grades"
-					class="nav-link"> <i class="fas fa-school"></i> Lớp học
-				</a> <a href="${pageContext.request.contextPath}/admin/lessons"
-					class="nav-link"> <i class="fas fa-book"></i> Bài học
-				</a> <a href="${pageContext.request.contextPath}/admin/quizzes"
-					class="nav-link"> <i class="fas fa-question-circle"></i> Câu
-					hỏi
-				</a> <a href="${pageContext.request.contextPath}/admin/users"
-					class="nav-link active"> <i class="fas fa-users"></i> Người
-					dùng <span class="badge">${totalUsers}</span>
-				</a>
-				<div class="nav-section">Hệ thống</div>
-				<a href="${pageContext.request.contextPath}/" class="nav-link">
-					<i class="fas fa-home"></i> Về trang chủ
-				</a> <a href="${pageContext.request.contextPath}/logout"
-					class="nav-link"> <i class="fas fa-sign-out-alt"></i> Đăng xuất
-				</a>
-			</nav>
+			<!-- Include Sidebar -->
+			<jsp:include page="/WEB-INF/jsp/admin/templates/admin-sidebar.jsp" />
 
 			<!-- Main Content -->
 			<main class="col-md-10 admin-content">

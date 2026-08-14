@@ -35,17 +35,8 @@ pageContext.setAttribute("pageTitle", title + " - Admin");
 
 	<div class="container-fluid p-0">
 		<div class="row no-gutters">
-			<nav class="col-md-2 admin-sidebar">
-				<div class="admin-sidebar-brand">
-					<h4>🧮 Admin</h4>
-					<small>Bé Học Toán</small>
-				</div>
-				<div class="nav-section">Quản lý</div>
-				<a href="${pageContext.request.contextPath}/admin/quizzes"
-					class="nav-link active"> <i class="fas fa-question-circle"></i>
-					Câu hỏi
-				</a>
-			</nav>
+			<!-- Include Sidebar -->
+			<jsp:include page="/WEB-INF/jsp/admin/templates/admin-sidebar.jsp" />
 
 			<main class="col-md-10 admin-content">
 				<div class="admin-form-container">
