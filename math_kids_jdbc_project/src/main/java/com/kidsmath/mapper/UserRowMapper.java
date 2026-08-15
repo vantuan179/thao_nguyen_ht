@@ -14,7 +14,12 @@ public class UserRowMapper implements RowMapper<User> {
 		user.setUsername(rs.getString("username"));
 		user.setPassword(rs.getString("password"));
 		user.setFullName(rs.getString("full_name"));
+		user.setEmail(rs.getString("email"));
 		user.setRole(rs.getString("role"));
+		user.setMembershipType(rs.getString("membership_type"));
+		user.setMembershipStartDate(rs.getTimestamp("membership_start_date"));
+		user.setMembershipExpiryDate(rs.getTimestamp("membership_expiry_date"));
+		user.setMembershipStatus(rs.getString("membership_status"));
 		user.setCreatedAt(rs.getTimestamp("created_at"));
 		return user;
 	}

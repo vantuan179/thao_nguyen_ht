@@ -88,4 +88,12 @@ public class UserService {
 	public List<User> searchByUsername(String keyword) {
 		return userDao.searchByUsername(keyword);
 	}
+
+	public long countByMembershipType(String membershipType) {
+		return userDao.countByMembershipType(membershipType);
+	}
+
+	public List<User> findExpiredMemberships() {
+		return userDao.findExpiredMemberships();
+	}
 }
