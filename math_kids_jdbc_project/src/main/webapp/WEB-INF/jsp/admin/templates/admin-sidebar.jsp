@@ -30,6 +30,25 @@
 		class="fas fa-users"></i> Người dùng <span class="badge">${totalUsers}</span>
 	</a>
 
+	<div class="nav-section">Thành viên</div>
+	<a href="${pageContext.request.contextPath}/admin/membership"
+		class="nav-link ${currentPage == 'membership' ? 'active' : ''}"> <i
+		class="fas fa-crown"></i> Quản lý thành viên <span class="badge">${totalPremium}</span>
+	</a> <a href="${pageContext.request.contextPath}/admin/membership/packages"
+		class="nav-link ${currentPage == 'membership-packages' ? 'active' : ''}">
+		<i class="fas fa-gift"></i> Gói thành viên
+	</a> <a href="${pageContext.request.contextPath}/admin/membership/payments"
+		class="nav-link ${currentPage == 'membership-payments' ? 'active' : ''}">
+		<i class="fas fa-credit-card"></i> Thanh toán <%-- SỬA: Kiểm tra pendingPaymentsCount là Integer --%>
+		<c:if
+			test="${pendingPaymentsCount != null && pendingPaymentsCount > 0}">
+			<span class="badge badge-danger">${pendingPaymentsCount}</span>
+		</c:if>
+	</a> <a href="${pageContext.request.contextPath}/admin/membership/history"
+		class="nav-link ${currentPage == 'membership-history' ? 'active' : ''}">
+		<i class="fas fa-history"></i> Lịch sử
+	</a>
+
 	<div class="nav-section">Email</div>
 	<a href="${pageContext.request.contextPath}/admin/email"
 		class="nav-link ${currentPage == 'email' ? 'active' : ''}"> <i

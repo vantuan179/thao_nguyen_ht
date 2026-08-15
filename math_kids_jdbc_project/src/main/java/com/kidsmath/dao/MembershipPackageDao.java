@@ -38,4 +38,14 @@ public class MembershipPackageDao {
 		List<MembershipPackage> packages = jdbcTemplate.query(sql, new MembershipPackageRowMapper(), packageType);
 		return packages.isEmpty() ? null : packages.get(0);
 	}
+
+	public int update(MembershipPackage pkg) {
+		String sql = "UPDATE public.membership_packages SET package_name = ?, package_type = ?, months = ?, price = ?, description = ?, active = ? WHERE id = ?";
+		return jdbcTemplate.update(sql, pkg.getPackageName(), pkg.getPackageType(), pkg.getMonths(), pkg.getPrice(), pkg.getDescription(), pkg.getActive(), pkg.getId());
+	}
+
+	public int save(MembershipPackage pkg) {
+		String sql = "INSERT INTO public.membership_packages (package_name, package_type, months, price, description, active) VALUES (?, ?, ?, ?, ?, ?)";
+		return jdbcTemplate.update(sql, pkg.getPackageName(), pkg.getPackageType(), pkg.getMonths(), pkg.getPrice(), pkg.getDescription(), pkg.getActive());
+	}
 }

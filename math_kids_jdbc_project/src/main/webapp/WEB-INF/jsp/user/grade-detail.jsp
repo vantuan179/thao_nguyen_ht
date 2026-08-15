@@ -2,32 +2,41 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
+<%
+// Kiểm tra grade có tồn tại không trước khi dùng
+String pageTitle = "Lớp học - Bé Học Toán";
+Object gradeObj = request.getAttribute("grade");
+if (gradeObj != null) {
+	com.kidsmath.model.Grade grade = (com.kidsmath.model.Grade) gradeObj;
+	if (grade.getGradeName() != null) {
+		pageTitle = grade.getGradeName() + " - Bé Học Toán";
+	}
+}
+pageContext.setAttribute("pageTitle", pageTitle);
+%>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${grade != null ? grade.gradeName : 'Lớp học'}- Bé Học
-	Toán</title>
+<title>${pageTitle}</title>
 
-<!-- Bootstrap CSS -->
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-<!-- Animate.css -->
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-<!-- Font Awesome -->
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<!-- Google Fonts -->
 <link
 	href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap"
 	rel="stylesheet">
-<!-- Custom CSS -->
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/assets/css/style.css">
 </head>
 <body>
+
+	<jsp:include page="/WEB-INF/jsp/user/templates/header.jsp" />
 
 	<div class="container py-4">
 		<!-- Grade Header -->
@@ -36,8 +45,28 @@
 			<div style="font-size: 5rem;">${grade != null ? grade.icon : '📚'}</div>
 			<h1 class="text-primary font-weight-bold mt-2">${grade != null ? grade.gradeName : 'Lớp học'}</h1>
 			<p class="text-muted">${grade != null ? grade.description : ''}</p>
+
+			<!-- Thông báo cho user dùng thử -->
+			<c:if test="${isTrial && isLoggedIn}">
+				<div class="alert alert-info mt-3">
+					<i class="fas fa-info-circle"></i> Bạn đang sử dụng gói <strong>Dùng
+						thử</strong>. Chỉ có thể xem <strong>1 bài học đầu tiên</strong> của mỗi
+					lớp. <a
+						href="${pageContext.request.contextPath}/membership/packages"
+						class="alert-link">Nâng cấp ngay</a>
+				</div>
+			</c:if>
+
+			<c:if test="${!isLoggedIn}">
+				<div class="alert alert-warning mt-3">
+					<i class="fas fa-exclamation-triangle"></i> Vui lòng <a
+						href="${pageContext.request.contextPath}/login" class="alert-link">đăng
+						nhập</a> để xem nội dung bài học.
+				</div>
+			</c:if>
+
 			<a href="${pageContext.request.contextPath}/"
-				class="btn btn-outline-primary btn-fun"> <i
+				class="btn btn-outline-primary btn-fun mt-2"> <i
 				class="fas fa-arrow-left"></i> Quay lại trang chủ
 			</a>
 		</div>
@@ -65,11 +94,42 @@
 									</div>
 									<h4 class="card-title text-info font-weight-bold">${lesson.title}</h4>
 									<p class="card-text text-muted">${lesson.description}</p>
-									<a
-										href="${pageContext.request.contextPath}/lesson/${lesson.id}"
-										class="btn btn-fun btn-fun-primary"> <i
-										class="fas fa-play"></i> Học ngay
-									</a>
+
+									<c:choose>
+										<c:when test="${isTrial && loop.index > 0}">
+											<!-- Bài học bị khóa (trial user không được xem) -->
+											<div class="mb-2">
+												<span class="badge badge-secondary"> <i
+													class="fas fa-lock"></i> Cần nâng cấp
+												</span>
+											</div>
+											<a
+												href="${pageContext.request.contextPath}/membership/packages"
+												class="btn btn-warning btn-fun"> <i class="fas fa-crown"></i>
+												Nâng cấp
+											</a>
+										</c:when>
+										<c:when test="${!isLoggedIn}">
+											<!-- User chưa đăng nhập -->
+											<div class="mb-2">
+												<span class="badge badge-secondary"> <i
+													class="fas fa-lock"></i> Cần đăng nhập
+												</span>
+											</div>
+											<a href="${pageContext.request.contextPath}/login"
+												class="btn btn-primary btn-fun"> <i
+												class="fas fa-sign-in-alt"></i> Đăng nhập
+											</a>
+										</c:when>
+										<c:otherwise>
+											<!-- User premium hoặc bài học đầu tiên của trial -->
+											<a
+												href="${pageContext.request.contextPath}/lesson/${lesson.id}"
+												class="btn btn-fun btn-fun-primary"> <i
+												class="fas fa-play"></i> Học ngay
+											</a>
+										</c:otherwise>
+									</c:choose>
 								</div>
 							</div>
 						</div>
@@ -90,7 +150,10 @@
 		</div>
 	</div>
 
-	<!-- Scripts -->
+	</div>
+
+	<jsp:include page="/WEB-INF/jsp/user/templates/footer.jsp" />
+
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>

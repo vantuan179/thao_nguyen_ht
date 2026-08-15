@@ -103,4 +103,9 @@ public class UserDao {
 		String sql = "SELECT id, username, password, full_name, email, role, membership_type, membership_start_date, membership_expiry_date, membership_status, created_at FROM users WHERE membership_type = 'premium' AND membership_expiry_date < CURRENT_TIMESTAMP AND membership_status = 'active'";
 		return jdbcTemplate.query(sql, new UserRowMapper());
 	}
+
+	public List<User> findByMembershipType(String membershipType) {
+		String sql = "SELECT id, username, password, full_name, email, role, membership_type, membership_start_date, membership_expiry_date, membership_status, created_at FROM users WHERE membership_type = ? ORDER BY id";
+		return jdbcTemplate.query(sql, new UserRowMapper(), membershipType);
+	}
 }

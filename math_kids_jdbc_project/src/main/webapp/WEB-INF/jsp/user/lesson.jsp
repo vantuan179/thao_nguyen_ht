@@ -404,12 +404,54 @@ body {
 			<i class="fas fa-arrow-left"></i> Quay lại
 		</a>
 
-		<!-- Lesson Box -->
+		<!-- ===== THÔNG BÁO QUYỀN HẠN ===== -->
+		<c:if test="${isTrialUser}">
+			<div class="membership-banner animate__animated animate__fadeInDown">
+				<div
+					class="d-flex justify-content-between align-items-center flex-wrap">
+					<div>
+						<h5>
+							<i class="fas fa-info-circle"></i> Gói Dùng thử
+						</h5>
+						<p class="mb-0">
+							Bạn chỉ xem được <strong>3 câu hỏi đầu tiên</strong> của bài học
+							này.
+						</p>
+					</div>
+					<a href="${pageContext.request.contextPath}/membership/packages"
+						class="btn btn-dark btn-fun mt-2 mt-sm-0"> <i
+						class="fas fa-crown"></i> Nâng cấp ngay
+					</a>
+				</div>
+			</div>
+		</c:if>
+
+		<c:if test="${!isLoggedIn}">
+			<div
+				class="alert alert-warning animate__animated animate__fadeInDown">
+				<i class="fas fa-exclamation-triangle"></i> Vui lòng <a
+					href="${pageContext.request.contextPath}/login"
+					class="alert-link font-weight-bold">đăng nhập</a> để xem nội dung
+				bài học và làm bài tập.
+			</div>
+		</c:if>
+
+		<!-- ===== LESSON BOX ===== -->
 		<div class="lesson-box animate__animated animate__fadeInDown">
 			<div class="text-center">
 				<div style="font-size: 3rem;">📚</div>
 				<h1 class="text-primary font-weight-bold mb-3">${lesson.title}</h1>
 				<p class="lead text-muted">${lesson.description}</p>
+
+				<!-- Hiển thị trạng thái bài học -->
+				<c:if test="${isTrialUser}">
+					<span class="badge badge-info"><i class="fas fa-info-circle"></i>
+						Bài học dùng thử</span>
+				</c:if>
+				<c:if test="${isPremiumUser}">
+					<span class="badge badge-success"><i class="fas fa-crown"></i>
+						Bài học Premium</span>
+				</c:if>
 			</div>
 
 			<c:if test="${not empty lesson.content}">
@@ -436,16 +478,21 @@ body {
 			</c:if>
 		</div>
 
-		<!-- Quiz List -->
+		<!-- ===== QUIZ LIST ===== -->
 		<h2 class="text-center mt-5 mb-4 text-info font-weight-bold">
 			<i class="fas fa-pencil-alt"></i> Câu hỏi luyện tập
+			<c:if test="${isTrialUser}">
+				<small class="text-muted d-block">(Hiển thị ${questionCount}
+					câu hỏi đầu tiên)</small>
+			</c:if>
 		</h2>
 
 		<div id="quiz-list">
 			<c:choose>
 				<c:when test="${not empty quizzes}">
 					<c:forEach var="quiz" items="${quizzes}" varStatus="loop">
-						<div class="quiz-card animate__animated animate__zoomIn"
+						<div
+							class="quiz-card animate__animated animate__zoomIn ${isTrialUser && loop.index >= 3 ? 'locked' : ''}"
 							data-quiz-id="${quiz.id}" data-points="${quiz.points}"
 							data-index="${loop.index}"
 							style="animation-delay:${loop.index * 0.1}s">
@@ -462,32 +509,51 @@ body {
 										<i class="fas fa-star text-warning"></i> Điểm: ${quiz.points}
 									</p>
 
-									<div class="row">
-										<div class="col-md-6">
-											<button class="option-btn" data-option="A"
-												data-quiz-id="${quiz.id}">
-												<span class="option-label">A</span> ${quiz.optionA}
-											</button>
-										</div>
-										<div class="col-md-6">
-											<button class="option-btn" data-option="B"
-												data-quiz-id="${quiz.id}">
-												<span class="option-label">B</span> ${quiz.optionB}
-											</button>
-										</div>
-										<div class="col-md-6">
-											<button class="option-btn" data-option="C"
-												data-quiz-id="${quiz.id}">
-												<span class="option-label">C</span> ${quiz.optionC}
-											</button>
-										</div>
-										<div class="col-md-6">
-											<button class="option-btn" data-option="D"
-												data-quiz-id="${quiz.id}">
-												<span class="option-label">D</span> ${quiz.optionD}
-											</button>
-										</div>
-									</div>
+									<c:choose>
+										<c:when test="${isTrialUser && loop.index >= 3}">
+											<!-- Câu hỏi bị khóa -->
+											<div class="text-center py-3">
+												<i class="fas fa-lock"
+													style="font-size: 2rem; color: #6c757d;"></i>
+												<p class="text-muted mt-2">Nâng cấp lên Premium để xem
+													câu hỏi này</p>
+												<a
+													href="${pageContext.request.contextPath}/membership/packages"
+													class="btn btn-warning btn-fun"> <i
+													class="fas fa-crown"></i> Nâng cấp ngay
+												</a>
+											</div>
+										</c:when>
+										<c:otherwise>
+											<!-- Câu hỏi có thể làm -->
+											<div class="row">
+												<div class="col-md-6">
+													<button class="option-btn" data-option="A"
+														data-quiz-id="${quiz.id}">
+														<span class="option-label">A</span> ${quiz.optionA}
+													</button>
+												</div>
+												<div class="col-md-6">
+													<button class="option-btn" data-option="B"
+														data-quiz-id="${quiz.id}">
+														<span class="option-label">B</span> ${quiz.optionB}
+													</button>
+												</div>
+												<div class="col-md-6">
+													<button class="option-btn" data-option="C"
+														data-quiz-id="${quiz.id}">
+														<span class="option-label">C</span> ${quiz.optionC}
+													</button>
+												</div>
+												<div class="col-md-6">
+													<button class="option-btn" data-option="D"
+														data-quiz-id="${quiz.id}">
+														<span class="option-label">D</span> ${quiz.optionD}
+													</button>
+												</div>
+											</div>
+										</c:otherwise>
+									</c:choose>
 
 									<div class="feedback mt-3 text-center" id="feedback-${quiz.id}"></div>
 
@@ -519,7 +585,8 @@ body {
 						<div style="font-size: 4rem;">📝</div>
 						<h4 class="text-muted mt-3">Chưa có câu hỏi cho bài học này</h4>
 						<p class="text-muted">Vui lòng quay lại sau nhé!</p>
-						<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
+						<a
+							href="${pageContext.request.contextPath}/grades/${lesson.grade}"
 							class="btn btn-fun btn-fun-primary mt-3"> <i
 							class="fas fa-arrow-left"></i> Quay lại bài học
 						</a>
@@ -535,19 +602,30 @@ body {
 
 		<!-- Buttons -->
 		<div class="confirm-btn-wrapper">
-			<button class="btn-confirm-answer" id="confirmAnswerBtn">
-				<i class="fas fa-check-circle"></i> Xác nhận tất cả câu trả lời
-			</button>
-			<button class="btn-check-all ml-3" id="checkAllBtn"
-				style="display: none;">
-				<i class="fas fa-flag-checkered"></i> Hoàn thành bài kiểm tra
-			</button>
-			<p class="text-muted small mt-2" id="confirmHint"></p>
+			<c:if test="${!isTrialUser || isPremiumUser}">
+				<button class="btn-confirm-answer" id="confirmAnswerBtn">
+					<i class="fas fa-check-circle"></i> Xác nhận câu trả lời
+				</button>
+				<button class="btn-check-all ml-3" id="checkAllBtn"
+					style="display: none;">
+					<i class="fas fa-flag-checkered"></i> Hoàn thành bài kiểm tra
+				</button>
+				<p class="text-muted small mt-2" id="confirmHint"></p>
+			</c:if>
+
+			<c:if test="${isTrialUser}">
+				<div class="alert alert-info mt-3">
+					<i class="fas fa-info-circle"></i> Bạn đang sử dụng gói <strong>Dùng
+						thử</strong>. Để làm tất cả câu hỏi, vui lòng <a
+						href="${pageContext.request.contextPath}/membership/packages"
+						class="alert-link font-weight-bold">nâng cấp lên Premium</a>.
+				</div>
+			</c:if>
 		</div>
 
 		<!-- Back to Lessons -->
 		<div class="text-center mt-2">
-			<a href="${pageContext.request.contextPath}/grade/${lesson.grade}"
+			<a href="${pageContext.request.contextPath}/grades/${lesson.grade}"
 				class="btn btn-outline-primary btn-fun"> <i
 				class="fas fa-arrow-left"></i> Quay lại danh sách bài học
 			</a>
@@ -566,14 +644,15 @@ body {
 							// ===== BIẾN TOÀN CỤC =====
 							var totalScore = 0;
 							var correctCount = 0;
-							var totalQuestions = $('.quiz-card').length;
+							var totalQuestions = $('.quiz-card:not(.locked)').length;
 							var answeredCount = 0;
 							var selectedCount = 0;
 							var isChecking = false;
 							var isAllChecked = false;
 							var hasUserInteracted = false;
 
-							console.log('Total questions:', totalQuestions);
+							console.log('Total questions (unlocked):',
+									totalQuestions);
 
 							// ===== CẬP NHẬT SỐ CÂU CÒN LẠI =====
 							function updateRemainingCount() {
@@ -607,7 +686,7 @@ body {
 									return;
 								}
 
-								var unanswered = $('.quiz-card:not(.answered)');
+								var unanswered = $('.quiz-card:not(.answered):not(.locked)');
 
 								if (unanswered.length === 0) {
 									$('#confirmHint')
@@ -653,6 +732,8 @@ body {
 														.data('quiz-id');
 
 												if ($card.hasClass('answered')
+														|| $card
+																.hasClass('locked')
 														|| isChecking
 														|| isAllChecked) {
 													return;
@@ -714,7 +795,7 @@ body {
 														.removeClass(
 																'not-selected');
 
-												var unanswered = $('.quiz-card:not(.answered)');
+												var unanswered = $('.quiz-card:not(.answered):not(.locked)');
 
 												if (unanswered.length === 0) {
 													alert('Tất cả câu hỏi đã được trả lời! Vui lòng nhấn "Hoàn thành" để kết thúc.');
@@ -767,7 +848,7 @@ body {
 														.html(
 																'<i class="fas fa-spinner fa-spin text-primary"></i> Đang kiểm tra câu trả lời...');
 
-												var cardsToCheck = $('.quiz-card:not(.answered)');
+												var cardsToCheck = $('.quiz-card:not(.answered):not(.locked)');
 												var totalToCheck = cardsToCheck.length;
 												var checkedCount = 0;
 
@@ -983,7 +1064,7 @@ body {
 												if (isAllChecked)
 													return;
 
-												var unansweredCards = $('.quiz-card:not(.answered)');
+												var unansweredCards = $('.quiz-card:not(.answered):not(.locked)');
 												var remaining = unansweredCards.length;
 
 												console.log(

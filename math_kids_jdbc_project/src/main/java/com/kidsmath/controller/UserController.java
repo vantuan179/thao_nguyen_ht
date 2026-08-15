@@ -34,7 +34,7 @@ public class UserController {
 
 	// ===== HOME - Hiển thị danh sách lớp học =====
 	@GetMapping("/")
-	public String home(Model model) {
+	public String home(Model model, HttpSession session) {
 		List<Grade> grades = gradeService.findActiveGrades();
 		for (Grade grade : grades) {
 			List<Lesson> lessons = lessonService.findByGrade(grade.getId());
@@ -44,21 +44,78 @@ public class UserController {
 		return "user/home";
 	}
 
+	// ===== XÓA METHOD NÀY - ĐÃ CÓ TRONG GradeController =====
+	/*
+	 * @GetMapping("/grades/{id}") public String gradeDetail(@PathVariable("id")
+	 * Integer id, Model model, HttpSession session) { // ... code ... return
+	 * "user/grade-detail"; }
+	 */
+
 	// ===== LESSON DETAIL =====
 	@GetMapping("/lesson/{id}")
-	public String lessonDetail(@PathVariable("id") Integer id, Model model) {
+	public String lessonDetail(@PathVariable("id") Integer id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+
+		User user = (User) session.getAttribute("currentUser");
 		Lesson lesson = lessonService.findById(id);
+
 		if (lesson == null) {
 			return "redirect:/";
 		}
 
+		// Kiểm tra quyền truy cập
+		if (user == null) {
+			redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để xem nội dung bài học!");
+			return "redirect:/login";
+		}
+
+		// Nếu là user dùng thử (trial)
+		if ("trial".equals(user.getMembershipType()) || user.getMembershipType() == null) {
+			List<Lesson> lessonsInGrade = lessonService.findByGrade(lesson.getGrade());
+			if (lessonsInGrade != null && !lessonsInGrade.isEmpty()) {
+				Lesson firstLesson = lessonsInGrade.get(0);
+				if (!firstLesson.getId().equals(id)) {
+					redirectAttributes.addFlashAttribute("error", "Bạn đang sử dụng gói dùng thử. Chỉ có thể xem bài học đầu tiên của mỗi lớp. Vui lòng đăng ký thành viên để xem tất cả bài học!");
+					return "redirect:/lesson/" + firstLesson.getId();
+				}
+			}
+		}
+
+		// Lấy danh sách câu hỏi
 		List<Quiz> quizzes = quizService.findByLessonId(id);
 		int totalPoints = quizService.getTotalPointsByLessonId(id);
+
+		// Kiểm tra quyền xem câu hỏi
+		boolean canViewQuizzes = false;
+		boolean isTrialUser = false;
+		boolean isPremiumUser = false;
+		boolean isAdmin = false;
+
+		if (user != null) {
+			isTrialUser = "trial".equals(user.getMembershipType()) || user.getMembershipType() == null;
+			isPremiumUser = "premium".equals(user.getMembershipType());
+			isAdmin = "ADMIN".equals(user.getRole());
+
+			if (isPremiumUser || isAdmin) {
+				canViewQuizzes = true;
+			} else if (isTrialUser) {
+				// Trial user chỉ xem được 3 câu hỏi đầu tiên
+				if (quizzes != null && quizzes.size() > 3) {
+					quizzes = quizzes.subList(0, 3);
+				}
+				canViewQuizzes = true;
+			}
+		}
 
 		model.addAttribute("lesson", lesson);
 		model.addAttribute("quizzes", quizzes);
 		model.addAttribute("totalPoints", totalPoints);
 		model.addAttribute("questionCount", quizzes != null ? quizzes.size() : 0);
+		model.addAttribute("canViewQuizzes", canViewQuizzes);
+		model.addAttribute("isTrialUser", isTrialUser);
+		model.addAttribute("isPremiumUser", isPremiumUser);
+		model.addAttribute("isLoggedIn", user != null);
+		model.addAttribute("isAdmin", isAdmin);
+
 		return "user/lesson";
 	}
 
@@ -73,8 +130,6 @@ public class UserController {
 		User user = userService.findByUsername(username);
 		if (user != null && user.getPassword().equals(password)) {
 			session.setAttribute("currentUser", user);
-			// userService.updateLastLogin(user.getId()); // Comment nếu chưa có cột
-			// last_login
 			if ("ADMIN".equals(user.getRole())) {
 				return "redirect:/admin";
 			}
@@ -93,7 +148,6 @@ public class UserController {
 	@PostMapping("/register")
 	public String doRegister(@RequestParam String fullName, @RequestParam String username, @RequestParam String email, @RequestParam String password, @RequestParam String confirmPassword, @RequestParam(value = "agreeTerms", defaultValue = "false") boolean agreeTerms, Model model, RedirectAttributes redirectAttributes) {
 
-		// 1. Kiểm tra điều khoản
 		if (!agreeTerms) {
 			model.addAttribute("error", "Vui lòng đồng ý với điều khoản sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -102,7 +156,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 2. Kiểm tra mật khẩu khớp
 		if (!password.equals(confirmPassword)) {
 			model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
 			model.addAttribute("fullName", fullName);
@@ -111,7 +164,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 3. Kiểm tra độ dài mật khẩu
 		if (password.length() < 6) {
 			model.addAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự!");
 			model.addAttribute("fullName", fullName);
@@ -120,7 +172,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 4. Kiểm tra tên đăng nhập đã tồn tại chưa
 		if (userService.existsByUsername(username)) {
 			model.addAttribute("error", "Tên đăng nhập '" + username + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -128,7 +179,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 5. Kiểm tra email đã tồn tại chưa
 		if (userService.existsByEmail(email)) {
 			model.addAttribute("error", "Email '" + email + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -136,7 +186,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 6. Validate email
 		if (!isValidEmail(email)) {
 			model.addAttribute("error", "Email không hợp lệ!");
 			model.addAttribute("fullName", fullName);
@@ -144,7 +193,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 7. Validate username
 		if (!isValidUsername(username)) {
 			model.addAttribute("error", "Tên đăng nhập chỉ bao gồm chữ, số và dấu gạch dưới, từ 3-20 ký tự!");
 			model.addAttribute("fullName", fullName);
@@ -152,7 +200,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 8. Tạo user mới
 		try {
 			User newUser = new User();
 			newUser.setFullName(fullName.trim());
@@ -160,6 +207,8 @@ public class UserController {
 			newUser.setEmail(email.trim());
 			newUser.setPassword(password);
 			newUser.setRole("USER");
+			newUser.setMembershipType("trial");
+			newUser.setMembershipStatus("active");
 
 			userService.save(newUser);
 

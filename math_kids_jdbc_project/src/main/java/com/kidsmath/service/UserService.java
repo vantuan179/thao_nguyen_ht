@@ -96,4 +96,8 @@ public class UserService {
 	public List<User> findExpiredMemberships() {
 		return userDao.findExpiredMemberships();
 	}
+
+	public List<User> findByMembershipType(String membershipType) {
+		return userDao.findByMembershipType(membershipType);
+	}
 }

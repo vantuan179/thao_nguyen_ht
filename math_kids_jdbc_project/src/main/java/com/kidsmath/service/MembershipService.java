@@ -47,11 +47,6 @@ public class MembershipService {
 		return membershipPackageDao.findByType(packageType);
 	}
 
-	// ===== LẤY THÔNG TIN NGÂN HÀNG =====
-	public List<BankAccount> getBankAccounts() {
-		return bankAccountDao.findActive();
-	}
-
 	// ===== KIỂM TRA TRẠNG THÁI THÀNH VIÊN =====
 	public boolean isPremiumUser(Integer userId) {
 		User user = userDao.findById(userId);
@@ -371,5 +366,34 @@ public class MembershipService {
 			user.setMembershipStatus("expired");
 			userDao.update(user);
 		}
+	}
+
+	public void updatePackage(MembershipPackage pkg) {
+		membershipPackageDao.update(pkg);
+	}
+
+	public void savePackage(MembershipPackage pkg) {
+		membershipPackageDao.save(pkg);
+	}
+
+	// ===== HỦY THANH TOÁN =====
+	public boolean cancelPayment(Integer historyId) {
+		try {
+			MembershipHistory history = membershipHistoryDao.findById(historyId);
+			if (history == null) {
+				return false;
+			}
+			// Cập nhật trạng thái thành cancelled
+			// membershipHistoryDao.updatePaymentStatus(historyId, "cancelled", null);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	// ===== LẤY DANH SÁCH NGÂN HÀNG =====
+	public List<BankAccount> getBankAccounts() {
+		return bankAccountDao.findActive();
 	}
 }
