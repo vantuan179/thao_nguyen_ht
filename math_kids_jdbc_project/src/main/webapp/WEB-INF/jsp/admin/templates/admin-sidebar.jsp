@@ -49,25 +49,19 @@
 		<i class="fas fa-history"></i> Lịch sử
 	</a>
 
-	<div class="nav-section">Email</div>
-	<a href="${pageContext.request.contextPath}/admin/email"
-		class="nav-link ${currentPage == 'email' ? 'active' : ''}"> <i
-		class="fas fa-envelope"></i> Quản lý Email <span class="badge">${totalEmails}</span>
-	</a> <a href="${pageContext.request.contextPath}/admin/email/send"
-		class="nav-link ${currentPage == 'email-send' ? 'active' : ''}"> <i
-		class="fas fa-paper-plane"></i> Gửi Email
-	</a> <a href="${pageContext.request.contextPath}/admin/email/templates"
-		class="nav-link ${currentPage == 'email-templates' ? 'active' : ''}">
-		<i class="fas fa-file-alt"></i> Mẫu Email
-	</a> <a href="${pageContext.request.contextPath}/admin/email/history"
-		class="nav-link ${currentPage == 'email-history' ? 'active' : ''}">
-		<i class="fas fa-history"></i> Lịch sử
-	</a>
-
 	<div class="nav-section">Hệ thống</div>
 	<a href="${pageContext.request.contextPath}/" class="nav-link"> <i
 		class="fas fa-home"></i> Về trang chủ
 	</a> <a href="${pageContext.request.contextPath}/logout" class="nav-link">
 		<i class="fas fa-sign-out-alt"></i> Đăng xuất
+	</a>
+
+	<div class="nav-section">Hỗ trợ</div>
+	<a href="${pageContext.request.contextPath}/admin/support"
+		class="nav-link ${currentPage == 'support' ? 'active' : ''}"> <i
+		class="fas fa-headset"></i> Hỗ trợ khách hàng <c:if
+			test="${unreadCount != null && unreadCount > 0}">
+			<span class="badge badge-danger">${unreadCount}</span>
+		</c:if>
 	</a>
 </nav>
