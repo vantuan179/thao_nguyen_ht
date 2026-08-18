@@ -35,6 +35,13 @@
 	<link rel="stylesheet"
 		href="${pageContext.request.contextPath}/assets/css/${pageCss}">
 </c:if>
+<!-- Google AdSense -->
+<c:if
+	test="${sessionScope.currentUser == null || sessionScope.currentUser.membershipType != 'premium'}">
+	<script async
+		src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+		crossorigin="anonymous"></script>
+</c:if>
 </head>
 <body>
 	<!-- Floating Shapes -->
