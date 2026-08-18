@@ -1,5 +1,6 @@
 package com.kidsmath.model;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 public class User {
@@ -9,11 +10,24 @@ public class User {
 	private String fullName;
 	private String email;
 	private String role;
-	private Integer gradeId; // Lớp học của user
-	private String membershipType; // trial, premium
+	private Integer gradeId;
+
+	// Thông tin cá nhân
+	private Date dateOfBirth;
+	private String street; // Đường/Phố
+	private String hamlet; // Thôn/Xóm/Ấp
+	private String commune; // Xã/Phường
+	private String district; // Huyện/Quận
+	private String province; // Tỉnh/Thành phố
+	private String phone;
+	private String gender;
+	private String avatar;
+
+	// Thành viên
+	private String membershipType;
 	private Timestamp membershipStartDate;
 	private Timestamp membershipExpiryDate;
-	private String membershipStatus; // active, expired, cancelled
+	private String membershipStatus;
 	private Timestamp createdAt;
 
 	public User() {
@@ -76,6 +90,78 @@ public class User {
 		this.gradeId = gradeId;
 	}
 
+	public Date getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(Date dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public String getHamlet() {
+		return hamlet;
+	}
+
+	public void setHamlet(String hamlet) {
+		this.hamlet = hamlet;
+	}
+
+	public String getCommune() {
+		return commune;
+	}
+
+	public void setCommune(String commune) {
+		this.commune = commune;
+	}
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
 	public String getMembershipType() {
 		return membershipType;
 	}
@@ -114,6 +200,46 @@ public class User {
 
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	// Helper method - Lấy địa chỉ đầy đủ
+	public String getFullAddress() {
+		StringBuilder sb = new StringBuilder();
+
+		// Đường/Phố
+		if (street != null && !street.isEmpty()) {
+			sb.append(street);
+		}
+
+		// Thôn/Xóm/Ấp
+		if (hamlet != null && !hamlet.isEmpty()) {
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(hamlet);
+		}
+
+		// Xã/Phường
+		if (commune != null && !commune.isEmpty()) {
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(commune);
+		}
+
+		// Huyện/Quận
+		if (district != null && !district.isEmpty()) {
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(district);
+		}
+
+		// Tỉnh/Thành phố
+		if (province != null && !province.isEmpty()) {
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(province);
+		}
+
+		return sb.toString();
 	}
 
 	public boolean isPremium() {

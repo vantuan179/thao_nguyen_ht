@@ -16,7 +16,30 @@ public class UserRowMapper implements RowMapper<User> {
 		user.setFullName(rs.getString("full_name"));
 		user.setEmail(rs.getString("email"));
 		user.setRole(rs.getString("role"));
-		user.setGradeId(rs.getInt("grade_id"));
+
+		try {
+			int gradeId = rs.getInt("grade_id");
+			if (!rs.wasNull()) {
+				user.setGradeId(gradeId);
+			}
+		} catch (SQLException e) {
+			user.setGradeId(null);
+		}
+
+		// Thông tin cá nhân
+		user.setDateOfBirth(rs.getDate("date_of_birth"));
+
+		// Địa chỉ theo cấu trúc mới
+		user.setStreet(rs.getString("street"));
+		user.setHamlet(rs.getString("hamlet"));
+		user.setCommune(rs.getString("commune"));
+		user.setDistrict(rs.getString("district"));
+		user.setProvince(rs.getString("province"));
+
+		user.setPhone(rs.getString("phone"));
+		user.setGender(rs.getString("gender"));
+		user.setAvatar(rs.getString("avatar"));
+
 		user.setMembershipType(rs.getString("membership_type"));
 		user.setMembershipStartDate(rs.getTimestamp("membership_start_date"));
 		user.setMembershipExpiryDate(rs.getTimestamp("membership_expiry_date"));

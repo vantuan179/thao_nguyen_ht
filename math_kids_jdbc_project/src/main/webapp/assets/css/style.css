@@ -1883,3 +1883,30 @@ a:hover {
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
     }
 }
+
+select.form-control {
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+    height: auto !important;
+    min-height: 48px;
+    padding: 8px 12px !important;
+    line-height: 1.5 !important;
+}
+
+select.form-control option {
+    padding: 8px 12px !important;
+    min-height: 35px !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+}
+
+select.form-control.form-control-lg {
+    min-height: 56px;
+    padding: 10px 15px !important;
+}
+
+select.form-control.form-control-lg option {
+    padding: 10px 15px !important;
+    min-height: 40px !important;
+}
