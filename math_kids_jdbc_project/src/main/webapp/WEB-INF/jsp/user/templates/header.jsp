@@ -56,28 +56,67 @@
 		</button>
 		<div class="collapse navbar-collapse" id="navbarNav">
 			<ul class="navbar-nav ml-auto">
+				<!-- Trang chủ -->
 				<li class="nav-item"><a class="nav-link"
 					href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+
+				<!-- Lớp học -->
 				<li class="nav-item"><a class="nav-link"
 					href="${pageContext.request.contextPath}/grades">Lớp học</a></li>
 
-				<!-- Support Link - Chỉ hiện khi đã đăng nhập -->
-				<c:if test="${not empty sessionScope.currentUser}">
-					<li class="nav-item"><a class="nav-link"
-						href="${pageContext.request.contextPath}/support"> <i
-							class="fas fa-headset"></i> Hỗ trợ
-					</a></li>
-				</c:if>
-
 				<c:choose>
 					<c:when test="${not empty sessionScope.currentUser}">
-						<li class="nav-item"><span
-							class="nav-link text-success font-weight-bold"> 👋
-								${sessionScope.currentUser.fullName} </span></li>
-						<li class="nav-item"><a class="nav-link"
-							href="${pageContext.request.contextPath}/logout">Đăng xuất</a></li>
+						<!-- User Dropdown - SỬA LẠI CẤU TRÚC -->
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle font-weight-bold text-primary"
+							href="#" id="userDropdown" role="button" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="false"> <i
+								class="fas fa-user-circle"></i>
+								${sessionScope.currentUser.fullName}
+						</a>
+							<div
+								class="dropdown-menu dropdown-menu-right shadow-lg border-0 rounded-lg"
+								aria-labelledby="userDropdown"
+								style="min-width: 220px; padding: 8px 0;">
+
+								<!-- Thông tin user -->
+								<div class="dropdown-user-info">
+									<div class="user-name">${sessionScope.currentUser.fullName}</div>
+									<div class="user-email">${sessionScope.currentUser.email}</div>
+									<div class="user-badge">
+										<span
+											class="badge ${sessionScope.currentUser.membershipType == 'premium' ? 'badge-success' : 'badge-info'}">
+											${sessionScope.currentUser.membershipType == 'premium' ? 'Premium' : 'Dùng thử'}
+										</span>
+									</div>
+								</div>
+
+								<div class="dropdown-divider"></div>
+
+								<!-- Profile -->
+								<a class="dropdown-item"
+									href="${pageContext.request.contextPath}/profile"> <i
+									class="fas fa-user"></i> Thông tin tài khoản
+								</a>
+
+								<!-- Support -->
+								<a class="dropdown-item"
+									href="${pageContext.request.contextPath}/support"> <i
+									class="fas fa-headset"></i> Hỗ trợ
+								</a>
+
+								<!-- Divider -->
+								<div class="dropdown-divider"></div>
+
+								<!-- Logout -->
+								<a class="dropdown-item text-danger"
+									href="${pageContext.request.contextPath}/logout"> <i
+									class="fas fa-sign-out-alt"></i> Đăng xuất
+								</a>
+							</div></li>
 					</c:when>
 					<c:otherwise>
+						<!-- Đăng nhập / Đăng ký -->
 						<li class="nav-item"><a class="nav-link"
 							href="${pageContext.request.contextPath}/login">Đăng nhập</a></li>
 						<li class="nav-item"><a

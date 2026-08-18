@@ -1755,3 +1755,131 @@ a:hover {
         height: 280px;
     }
 }
+
+.form-control[disabled],
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.input-group-text {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem 0 0 0.25rem;
+}
+
+/* Chat input disabled */
+.chat-input-area .form-control:disabled {
+    background: #f8f9fa;
+    opacity: 0.7;
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== DROPDOWN MENU ===== */
+.dropdown-menu {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+    padding: 8px 0;
+    min-width: 220px;
+    animation: dropdownFade 0.2s ease;
+    margin-top: 8px !important;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    color: #2d3436;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f0f7ff;
+    color: #667eea;
+}
+
+.dropdown-item i {
+    width: 20px;
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.dropdown-item:hover i {
+    color: #667eea;
+}
+
+.dropdown-item.text-danger:hover {
+    background: #fde8e8;
+    color: #dc3545;
+}
+
+.dropdown-item.text-danger:hover i {
+    color: #dc3545;
+}
+
+.dropdown-divider {
+    margin: 8px 0;
+}
+
+.nav-link.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link.dropdown-toggle i {
+    font-size: 1.1rem;
+}
+
+/* User info in dropdown */
+.dropdown-user-info {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.dropdown-user-info .user-name {
+    font-weight: 700;
+    color: #2d3436;
+}
+
+.dropdown-user-info .user-email {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.dropdown-user-info .user-badge {
+    margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        min-width: 100%;
+        border-radius: 12px !important;
+    }
+    
+    .navbar-nav .dropdown-menu {
+        position: static !important;
+        float: none !important;
+        width: auto !important;
+        margin-top: 8px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+}

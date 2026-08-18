@@ -249,4 +249,59 @@ public class UserController {
 		String usernameRegex = "^[a-zA-Z0-9_]{3,20}$";
 		return username.trim().matches(usernameRegex);
 	}
+
+	// ===== PROFILE =====
+	@GetMapping("/profile")
+	public String profilePage(HttpSession session, Model model) {
+		User user = (User) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+		return "user/profile";
+	}
+
+	@PostMapping("/profile/update")
+	public String updateProfile(@RequestParam String fullName, @RequestParam String email, HttpSession session, RedirectAttributes redirectAttributes) {
+		User user = (User) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+
+		try {
+			user.setFullName(fullName);
+			user.setEmail(email);
+			userService.update(user);
+			session.setAttribute("currentUser", user);
+			redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+		}
+		return "redirect:/profile";
+	}
+
+	@PostMapping("/profile/change-password")
+	public String changePassword(@RequestParam String oldPassword, @RequestParam String newPassword, @RequestParam String confirmPassword, HttpSession session, RedirectAttributes redirectAttributes) {
+		User user = (User) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+
+		if (!newPassword.equals(confirmPassword)) {
+			redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+			return "redirect:/profile";
+		}
+
+		if (newPassword.length() < 6) {
+			redirectAttributes.addFlashAttribute("error", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+			return "redirect:/profile";
+		}
+
+		boolean success = userService.changePassword(user.getUsername(), oldPassword, newPassword);
+		if (success) {
+			redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công!");
+		} else {
+			redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng!");
+		}
+		return "redirect:/profile";
+	}
 }
