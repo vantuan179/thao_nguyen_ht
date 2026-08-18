@@ -15,19 +15,20 @@ pageContext.setAttribute("showAds", showAds);
 <!-- Include Header -->
 <jsp:include page="/WEB-INF/jsp/user/templates/header.jsp" />
 
-<!-- ===== QUẢNG CÁO LỀ NGOÀI 2 BÊN ===== -->
 <c:if test="${showAds}">
+	<!-- ===== CÓ QUẢNG CÁO ===== -->
 	<div class="container-fluid px-0">
 		<div class="row no-gutters">
-			<!-- Left Ad - Lề ngoài bên trái -->
-			<div class="col-lg-2 d-none d-lg-block">
+			<!-- Left Ad -->
+			<div class="col-lg-2 d-none d-lg-block"
+				style="padding-left: 0; padding-right: 0;">
 				<div class="ad-outer-left">
 					<div class="ad-container-outer">
-						<div class="ad-label">Quảng cáo</div>
+						<span class="ad-label">Quảng cáo</span>
 						<ins class="adsbygoogle"
 							style="display: block; width: 160px; height: 600px;"
 							data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
-							data-ad-slot="YOUR_AD_SLOT_LEFT_OUTER" data-ad-format="rectangle"></ins>
+							data-ad-slot="YOUR_AD_SLOT_LEFT" data-ad-format="rectangle"></ins>
 						<script>
 							(adsbygoogle = window.adsbygoogle || []).push({});
 						</script>
@@ -126,16 +127,16 @@ pageContext.setAttribute("showAds", showAds);
 				</div>
 			</div>
 
-			<!-- Right Ad - Lề ngoài bên phải -->
-			<div class="col-lg-2 d-none d-lg-block">
+			<!-- Right Ad -->
+			<div class="col-lg-2 d-none d-lg-block"
+				style="padding-left: 0; padding-right: 0;">
 				<div class="ad-outer-right">
 					<div class="ad-container-outer">
-						<div class="ad-label">Quảng cáo</div>
+						<span class="ad-label">Quảng cáo</span>
 						<ins class="adsbygoogle"
 							style="display: block; width: 160px; height: 600px;"
 							data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
-							data-ad-slot="YOUR_AD_SLOT_RIGHT_OUTER"
-							data-ad-format="rectangle"></ins>
+							data-ad-slot="YOUR_AD_SLOT_RIGHT" data-ad-format="rectangle"></ins>
 						<script>
 							(adsbygoogle = window.adsbygoogle || []).push({});
 						</script>
@@ -146,8 +147,8 @@ pageContext.setAttribute("showAds", showAds);
 	</div>
 </c:if>
 
-<!-- Không hiển thị quảng cáo (user premium) -->
 <c:if test="${!showAds}">
+	<!-- ===== KHÔNG QUẢNG CÁO (PREMIUM) ===== -->
 	<div class="container">
 		<!-- Hero Section -->
 		<div class="hero animate__animated animate__bounceIn">
@@ -169,7 +170,7 @@ pageContext.setAttribute("showAds", showAds);
 			<c:choose>
 				<c:when test="${not empty grades}">
 					<c:forEach var="grade" items="${grades}" varStatus="loop">
-						<div class="col-md-6 col-lg-4 mb-4">
+						<div class="col-md-4 col-lg-3 mb-4">
 							<div class="lesson-card animate__animated animate__fadeInUp"
 								style="animation-delay:${loop.index * 0.1}s">
 								<div class="card-body text-center">
@@ -237,19 +238,16 @@ pageContext.setAttribute("showAds", showAds);
 <!-- Include Footer -->
 <jsp:include page="/WEB-INF/jsp/user/templates/footer.jsp" />
 
-<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Page-specific JavaScript -->
 <c:if test="${not empty pageJs}">
 	<script src="${pageContext.request.contextPath}/assets/js/${pageJs}"></script>
 </c:if>
 
 <script>
 	$(document).ready(function() {
-		// Smooth scroll to grades section
 		$('.hero .btn').click(function(e) {
 			e.preventDefault();
 			var target = $(this).attr('href');
