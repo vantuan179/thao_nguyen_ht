@@ -32,7 +32,7 @@ public class UserController {
 	@Autowired
 	private GradeService gradeService;
 
-	// ===== HOME - Hiển thị danh sách lớp học =====
+	// ===== HOME =====
 	@GetMapping("/")
 	public String home(Model model, HttpSession session) {
 		List<Grade> grades = gradeService.findActiveGrades();
@@ -43,13 +43,6 @@ public class UserController {
 		model.addAttribute("grades", grades);
 		return "user/home";
 	}
-
-	// ===== XÓA METHOD NÀY - ĐÃ CÓ TRONG GradeController =====
-	/*
-	 * @GetMapping("/grades/{id}") public String gradeDetail(@PathVariable("id")
-	 * Integer id, Model model, HttpSession session) { // ... code ... return
-	 * "user/grade-detail"; }
-	 */
 
 	// ===== LESSON DETAIL =====
 	@GetMapping("/lesson/{id}")
@@ -62,29 +55,25 @@ public class UserController {
 			return "redirect:/";
 		}
 
-		// Kiểm tra quyền truy cập
 		if (user == null) {
 			redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để xem nội dung bài học!");
 			return "redirect:/login";
 		}
 
-		// Nếu là user dùng thử (trial)
 		if ("trial".equals(user.getMembershipType()) || user.getMembershipType() == null) {
 			List<Lesson> lessonsInGrade = lessonService.findByGrade(lesson.getGrade());
 			if (lessonsInGrade != null && !lessonsInGrade.isEmpty()) {
 				Lesson firstLesson = lessonsInGrade.get(0);
 				if (!firstLesson.getId().equals(id)) {
-					redirectAttributes.addFlashAttribute("error", "Bạn đang sử dụng gói dùng thử. Chỉ có thể xem bài học đầu tiên của mỗi lớp. Vui lòng đăng ký thành viên để xem tất cả bài học!");
+					redirectAttributes.addFlashAttribute("error", "Bạn đang sử dụng gói dùng thử. Chỉ có thể xem bài học đầu tiên của mỗi lớp.");
 					return "redirect:/lesson/" + firstLesson.getId();
 				}
 			}
 		}
 
-		// Lấy danh sách câu hỏi
 		List<Quiz> quizzes = quizService.findByLessonId(id);
 		int totalPoints = quizService.getTotalPointsByLessonId(id);
 
-		// Kiểm tra quyền xem câu hỏi
 		boolean canViewQuizzes = false;
 		boolean isTrialUser = false;
 		boolean isPremiumUser = false;
@@ -98,7 +87,6 @@ public class UserController {
 			if (isPremiumUser || isAdmin) {
 				canViewQuizzes = true;
 			} else if (isTrialUser) {
-				// Trial user chỉ xem được 3 câu hỏi đầu tiên
 				if (quizzes != null && quizzes.size() > 3) {
 					quizzes = quizzes.subList(0, 3);
 				}
@@ -117,6 +105,70 @@ public class UserController {
 		model.addAttribute("isAdmin", isAdmin);
 
 		return "user/lesson";
+	}
+
+	// ===== PROFILE =====
+	@GetMapping("/profile")
+	public String profilePage(HttpSession session, Model model) {
+		User user = (User) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+
+		List<Grade> grades = gradeService.findAll();
+		model.addAttribute("grades", grades);
+		return "user/profile";
+	}
+
+	// ===== UPDATE PROFILE - GỘP CHUNG 1 METHOD =====
+	@PostMapping("/profile/update")
+	public String updateProfile(@RequestParam String fullName, @RequestParam String email, @RequestParam(required = false) Integer gradeId, @RequestParam(required = false) String oldPassword, @RequestParam(required = false) String newPassword, @RequestParam(required = false) String confirmPassword, HttpSession session, RedirectAttributes redirectAttributes) {
+
+		User user = (User) session.getAttribute("currentUser");
+		if (user == null) {
+			return "redirect:/login";
+		}
+
+		try {
+			// Cập nhật thông tin cơ bản
+			user.setFullName(fullName);
+			user.setEmail(email);
+
+			// Cập nhật lớp học nếu có
+			if (gradeId != null) {
+				user.setGradeId(gradeId);
+			}
+
+			userService.update(user);
+			session.setAttribute("currentUser", user);
+
+			// Kiểm tra đổi mật khẩu
+			if (oldPassword != null && !oldPassword.isEmpty() && newPassword != null && !newPassword.isEmpty()) {
+
+				if (!newPassword.equals(confirmPassword)) {
+					redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+					return "redirect:/profile";
+				}
+
+				if (newPassword.length() < 6) {
+					redirectAttributes.addFlashAttribute("error", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+					return "redirect:/profile";
+				}
+
+				boolean passwordChanged = userService.changePassword(user.getUsername(), oldPassword, newPassword);
+				if (!passwordChanged) {
+					redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng!");
+					return "redirect:/profile";
+				}
+			}
+
+			redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
+
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+		}
+
+		return "redirect:/profile";
 	}
 
 	// ===== LOGIN =====
@@ -248,60 +300,5 @@ public class UserController {
 		}
 		String usernameRegex = "^[a-zA-Z0-9_]{3,20}$";
 		return username.trim().matches(usernameRegex);
-	}
-
-	// ===== PROFILE =====
-	@GetMapping("/profile")
-	public String profilePage(HttpSession session, Model model) {
-		User user = (User) session.getAttribute("currentUser");
-		if (user == null) {
-			return "redirect:/login";
-		}
-		return "user/profile";
-	}
-
-	@PostMapping("/profile/update")
-	public String updateProfile(@RequestParam String fullName, @RequestParam String email, HttpSession session, RedirectAttributes redirectAttributes) {
-		User user = (User) session.getAttribute("currentUser");
-		if (user == null) {
-			return "redirect:/login";
-		}
-
-		try {
-			user.setFullName(fullName);
-			user.setEmail(email);
-			userService.update(user);
-			session.setAttribute("currentUser", user);
-			redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
-		} catch (Exception e) {
-			redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-		}
-		return "redirect:/profile";
-	}
-
-	@PostMapping("/profile/change-password")
-	public String changePassword(@RequestParam String oldPassword, @RequestParam String newPassword, @RequestParam String confirmPassword, HttpSession session, RedirectAttributes redirectAttributes) {
-		User user = (User) session.getAttribute("currentUser");
-		if (user == null) {
-			return "redirect:/login";
-		}
-
-		if (!newPassword.equals(confirmPassword)) {
-			redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
-			return "redirect:/profile";
-		}
-
-		if (newPassword.length() < 6) {
-			redirectAttributes.addFlashAttribute("error", "Mật khẩu mới phải có ít nhất 6 ký tự!");
-			return "redirect:/profile";
-		}
-
-		boolean success = userService.changePassword(user.getUsername(), oldPassword, newPassword);
-		if (success) {
-			redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công!");
-		} else {
-			redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng!");
-		}
-		return "redirect:/profile";
 	}
 }
