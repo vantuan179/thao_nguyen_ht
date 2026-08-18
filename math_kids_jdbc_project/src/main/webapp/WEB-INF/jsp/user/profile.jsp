@@ -54,6 +54,19 @@ pageContext.setAttribute("pageTitle", "Thông tin tài khoản - Bé Học Toán
 								class="text-muted">Tên đăng nhập không thể thay đổi</small>
 						</div>
 
+						<!-- Lớp học -->
+						<div class="form-group">
+							<label class="font-weight-bold">Lớp học của tôi</label> <select
+								name="gradeId" class="form-control">
+								<option value="">-- Chọn lớp học --</option>
+								<c:forEach var="grade" items="${grades}">
+									<option value="${grade.id}"
+										${sessionScope.currentUser.gradeId == grade.id ? 'selected' : ''}>
+										${grade.gradeName} - ${grade.description}</option>
+								</c:forEach>
+							</select> <small class="text-muted">Chọn lớp học bạn đang theo học</small>
+						</div>
+
 						<!-- Loại thành viên -->
 						<div class="form-group">
 							<label class="font-weight-bold">Loại thành viên</label>

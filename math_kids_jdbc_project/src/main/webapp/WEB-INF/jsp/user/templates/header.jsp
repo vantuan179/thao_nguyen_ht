@@ -47,26 +47,22 @@
 	<!-- Navbar -->
 	<nav
 		class="navbar navbar-expand-lg navbar-light navbar-custom container">
-		<a class="navbar-brand" href="${pageContext.request.contextPath}/">🧮
-			Bé Học Toán</a>
+		<!-- Logo - Click để về trang chủ -->
+		<a class="navbar-brand" href="${pageContext.request.contextPath}/">
+			<span style="font-size: 1.8rem;">🧮</span> Bé Học Toán
+		</a>
+
 		<button class="navbar-toggler" type="button" data-toggle="collapse"
 			data-target="#navbarNav" aria-controls="navbarNav"
 			aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
+
 		<div class="collapse navbar-collapse" id="navbarNav">
 			<ul class="navbar-nav ml-auto">
-				<!-- Trang chủ -->
-				<li class="nav-item"><a class="nav-link"
-					href="${pageContext.request.contextPath}/">Trang chủ</a></li>
-
-				<!-- Lớp học -->
-				<li class="nav-item"><a class="nav-link"
-					href="${pageContext.request.contextPath}/grades">Lớp học</a></li>
-
 				<c:choose>
 					<c:when test="${not empty sessionScope.currentUser}">
-						<!-- User Dropdown - SỬA LẠI CẤU TRÚC -->
+						<!-- User Dropdown -->
 						<li class="nav-item dropdown"><a
 							class="nav-link dropdown-toggle font-weight-bold text-primary"
 							href="#" id="userDropdown" role="button" data-toggle="dropdown"
@@ -90,6 +86,31 @@
 										</span>
 									</div>
 								</div>
+
+								<div class="dropdown-divider"></div>
+
+								<!-- Lớp học của user -->
+								<div class="px-3 py-1">
+									<small class="text-muted">Lớp học của tôi</small>
+								</div>
+
+								<c:choose>
+									<c:when test="${sessionScope.currentUser.gradeId != null}">
+										<c:set var="gradeService" value="${gradeService}" />
+										<c:set var="grade"
+											value="${gradeService.findById(sessionScope.currentUser.gradeId)}" />
+										<a class="dropdown-item font-weight-bold text-primary"
+											href="${pageContext.request.contextPath}/grades/${sessionScope.currentUser.gradeId}">
+											<i class="fas fa-book-open"></i> ${grade != null ? grade.gradeName : 'Lớp ' .concat(sessionScope.currentUser.gradeId)}
+										</a>
+									</c:when>
+									<c:otherwise>
+										<a class="dropdown-item text-muted"
+											href="${pageContext.request.contextPath}/profile"> <i
+											class="fas fa-plus-circle"></i> Chọn lớp học
+										</a>
+									</c:otherwise>
+								</c:choose>
 
 								<div class="dropdown-divider"></div>
 
@@ -118,10 +139,14 @@
 					<c:otherwise>
 						<!-- Đăng nhập / Đăng ký -->
 						<li class="nav-item"><a class="nav-link"
-							href="${pageContext.request.contextPath}/login">Đăng nhập</a></li>
+							href="${pageContext.request.contextPath}/login"> <i
+								class="fas fa-sign-in-alt"></i> Đăng nhập
+						</a></li>
 						<li class="nav-item"><a
 							class="nav-link btn btn-fun btn-fun-primary text-white px-3"
-							href="${pageContext.request.contextPath}/register">Đăng ký</a></li>
+							href="${pageContext.request.contextPath}/register"> <i
+								class="fas fa-user-plus"></i> Đăng ký
+						</a></li>
 					</c:otherwise>
 				</c:choose>
 			</ul>

@@ -9,6 +9,7 @@ public class User {
 	private String fullName;
 	private String email;
 	private String role;
+	private Integer gradeId; // Lớp học của user
 	private String membershipType; // trial, premium
 	private Timestamp membershipStartDate;
 	private Timestamp membershipExpiryDate;
@@ -67,6 +68,14 @@ public class User {
 		this.role = role;
 	}
 
+	public Integer getGradeId() {
+		return gradeId;
+	}
+
+	public void setGradeId(Integer gradeId) {
+		this.gradeId = gradeId;
+	}
+
 	public String getMembershipType() {
 		return membershipType;
 	}
@@ -107,12 +116,7 @@ public class User {
 		this.createdAt = createdAt;
 	}
 
-	// Helper methods
 	public boolean isPremium() {
 		return "premium".equals(membershipType) && "active".equals(membershipStatus) && membershipExpiryDate != null && membershipExpiryDate.after(new Timestamp(System.currentTimeMillis()));
-	}
-
-	public boolean isTrial() {
-		return "trial".equals(membershipType) || (membershipExpiryDate == null || membershipExpiryDate.before(new Timestamp(System.currentTimeMillis())));
 	}
 }
