@@ -67,8 +67,8 @@ pageContext.setAttribute("pageJs", "login.js");
 							class="form-group d-flex justify-content-between align-items-center">
 							<div class="form-check">
 								<input type="checkbox" class="form-check-input" id="rememberMe"
-									name="rememberMe"> <label class="form-check-label"
-									for="rememberMe">Ghi nhớ tôi</label>
+									name="rememberMe" value="true"> <label
+									class="form-check-label" for="rememberMe">Ghi nhớ tôi</label>
 							</div>
 							<a href="${pageContext.request.contextPath}/forgot-password"
 								class="text-primary"> Quên mật khẩu? </a>

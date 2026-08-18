@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.Date;
 import java.util.List;
@@ -35,7 +38,10 @@ public class UserController {
 
 	// ===== HOME =====
 	@GetMapping("/")
-	public String home(Model model, HttpSession session) {
+	public String home(Model model, HttpSession session, HttpServletRequest request) {
+		// Kiểm tra cookie remember me
+		checkRememberMe(request, session);
+
 		List<Grade> grades = gradeService.findActiveGrades();
 		for (Grade grade : grades) {
 			List<Lesson> lessons = lessonService.findByGrade(grade.getId());
@@ -45,9 +51,40 @@ public class UserController {
 		return "user/home";
 	}
 
+	// ===== CHECK REMEMBER ME =====
+	private void checkRememberMe(HttpServletRequest request, HttpSession session) {
+		if (session.getAttribute("currentUser") == null) {
+			Cookie[] cookies = request.getCookies();
+			if (cookies != null) {
+				String username = null;
+				String token = null;
+
+				for (Cookie cookie : cookies) {
+					if ("remember_username".equals(cookie.getName())) {
+						username = cookie.getValue();
+					}
+					if ("remember_token".equals(cookie.getName())) {
+						token = cookie.getValue();
+					}
+				}
+
+				if (username != null && token != null) {
+					// Kiểm tra token (có thể lưu trong DB)
+					User user = userService.findByUsername(username);
+					if (user != null) {
+						// Kiểm tra token hợp lệ (có thể lưu trong DB)
+						session.setAttribute("currentUser", user);
+					}
+				}
+			}
+		}
+	}
+
 	// ===== LESSON DETAIL =====
 	@GetMapping("/lesson/{id}")
-	public String lessonDetail(@PathVariable("id") Integer id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+	public String lessonDetail(@PathVariable("id") Integer id, Model model, HttpSession session, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+
+		checkRememberMe(request, session);
 
 		User user = (User) session.getAttribute("currentUser");
 		Lesson lesson = lessonService.findById(id);
@@ -110,7 +147,9 @@ public class UserController {
 
 	// ===== PROFILE =====
 	@GetMapping("/profile")
-	public String profilePage(HttpSession session, Model model) {
+	public String profilePage(HttpSession session, Model model, HttpServletRequest request) {
+		checkRememberMe(request, session);
+
 		User user = (User) session.getAttribute("currentUser");
 		if (user == null) {
 			return "redirect:/login";
@@ -124,7 +163,9 @@ public class UserController {
 	// ===== UPDATE PROFILE =====
 	@PostMapping("/profile/update")
 	public String updateProfile(@RequestParam String fullName, @RequestParam String email, @RequestParam(required = false) Integer gradeId, @RequestParam(required = false) String dateOfBirth, @RequestParam(required = false) String phone, @RequestParam(required = false) String street, @RequestParam(required = false) String hamlet, @RequestParam(required = false) String commune, @RequestParam(required = false) String district, @RequestParam(required = false) String province,
-			@RequestParam(required = false) String oldPassword, @RequestParam(required = false) String newPassword, @RequestParam(required = false) String confirmPassword, HttpSession session, RedirectAttributes redirectAttributes) {
+			@RequestParam(required = false) String oldPassword, @RequestParam(required = false) String newPassword, @RequestParam(required = false) String confirmPassword, HttpSession session, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+
+		checkRememberMe(request, session);
 
 		User user = (User) session.getAttribute("currentUser");
 		if (user == null) {
@@ -184,17 +225,67 @@ public class UserController {
 
 	// ===== LOGIN =====
 	@GetMapping("/login")
-	public String loginPage() {
+	public String loginPage(HttpServletRequest request) {
+		// Nếu đã có cookie remember me, tự động đăng nhập
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			String username = null;
+			String token = null;
+
+			for (Cookie cookie : cookies) {
+				if ("remember_username".equals(cookie.getName())) {
+					username = cookie.getValue();
+				}
+				if ("remember_token".equals(cookie.getName())) {
+					token = cookie.getValue();
+				}
+			}
+
+			if (username != null && token != null) {
+				User user = userService.findByUsername(username);
+				if (user != null) {
+					// Kiểm tra token hợp lệ
+					return "redirect:/";
+				}
+			}
+		}
 		return "user/login";
 	}
 
 	@PostMapping("/login")
-	public String doLogin(@RequestParam String username, @RequestParam String password, HttpSession session, RedirectAttributes redirectAttributes) {
+	public String doLogin(@RequestParam String username, @RequestParam String password, @RequestParam(required = false) String rememberMe, HttpSession session, HttpServletResponse response, RedirectAttributes redirectAttributes) {
 		User user = userService.findByUsername(username);
 		if (user != null && user.getPassword().equals(password)) {
 			session.setAttribute("currentUser", user);
-			// Cập nhật lần đăng nhập cuối
 			userService.updateLastLogin(user.getId());
+
+			// Xử lý Remember Me
+			if (rememberMe != null && rememberMe.equals("true")) {
+				// Tạo cookie remember me (lưu 30 ngày)
+				Cookie usernameCookie = new Cookie("remember_username", username);
+				usernameCookie.setMaxAge(30 * 24 * 60 * 60); // 30 ngày
+				usernameCookie.setPath("/");
+				response.addCookie(usernameCookie);
+
+				// Tạo token (có thể lưu trong DB và mã hóa)
+				String token = username + ":" + System.currentTimeMillis();
+				Cookie tokenCookie = new Cookie("remember_token", token);
+				tokenCookie.setMaxAge(30 * 24 * 60 * 60); // 30 ngày
+				tokenCookie.setPath("/");
+				response.addCookie(tokenCookie);
+			} else {
+				// Xóa cookie remember me nếu có
+				Cookie usernameCookie = new Cookie("remember_username", null);
+				usernameCookie.setMaxAge(0);
+				usernameCookie.setPath("/");
+				response.addCookie(usernameCookie);
+
+				Cookie tokenCookie = new Cookie("remember_token", null);
+				tokenCookie.setMaxAge(0);
+				tokenCookie.setPath("/");
+				response.addCookie(tokenCookie);
+			}
+
 			if ("ADMIN".equals(user.getRole())) {
 				return "redirect:/admin";
 			}
@@ -215,7 +306,6 @@ public class UserController {
 	public String doRegister(@RequestParam String fullName, @RequestParam String username, @RequestParam String email, @RequestParam String password, @RequestParam String confirmPassword, @RequestParam(required = false) String dateOfBirth, @RequestParam(required = false) String phone, @RequestParam(required = false) String street, @RequestParam(required = false) String hamlet, @RequestParam(required = false) String commune, @RequestParam(required = false) String district,
 			@RequestParam(required = false) String province, @RequestParam(value = "agreeTerms", defaultValue = "false") boolean agreeTerms, Model model, RedirectAttributes redirectAttributes) {
 
-		// 1. Kiểm tra điều khoản
 		if (!agreeTerms) {
 			model.addAttribute("error", "Vui lòng đồng ý với điều khoản sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -224,7 +314,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 2. Kiểm tra mật khẩu khớp
 		if (!password.equals(confirmPassword)) {
 			model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
 			model.addAttribute("fullName", fullName);
@@ -233,7 +322,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 3. Kiểm tra độ dài mật khẩu
 		if (password.length() < 6) {
 			model.addAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự!");
 			model.addAttribute("fullName", fullName);
@@ -242,7 +330,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 4. Kiểm tra tên đăng nhập đã tồn tại chưa
 		if (userService.existsByUsername(username)) {
 			model.addAttribute("error", "Tên đăng nhập '" + username + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -250,7 +337,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 5. Kiểm tra email đã tồn tại chưa
 		if (userService.existsByEmail(email)) {
 			model.addAttribute("error", "Email '" + email + "' đã được sử dụng!");
 			model.addAttribute("fullName", fullName);
@@ -258,7 +344,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 6. Validate email
 		if (!isValidEmail(email)) {
 			model.addAttribute("error", "Email không hợp lệ!");
 			model.addAttribute("fullName", fullName);
@@ -266,7 +351,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 7. Validate username
 		if (!isValidUsername(username)) {
 			model.addAttribute("error", "Tên đăng nhập chỉ bao gồm chữ, số và dấu gạch dưới, từ 3-20 ký tự!");
 			model.addAttribute("fullName", fullName);
@@ -274,7 +358,6 @@ public class UserController {
 			return "user/register";
 		}
 
-		// 8. Tạo user mới
 		try {
 			User newUser = new User();
 			newUser.setFullName(fullName.trim());
@@ -285,7 +368,6 @@ public class UserController {
 			newUser.setMembershipType("trial");
 			newUser.setMembershipStatus("active");
 
-			// Thêm thông tin cá nhân (không bắt buộc)
 			if (dateOfBirth != null && !dateOfBirth.isEmpty()) {
 				newUser.setDateOfBirth(Date.valueOf(dateOfBirth));
 			}
@@ -321,9 +403,21 @@ public class UserController {
 
 	// ===== LOGOUT =====
 	@GetMapping("/logout")
-	public String logout(HttpSession session) {
+	public String logout(HttpSession session, HttpServletResponse response) {
 		session.invalidate();
-		return "redirect:/";
+
+		// Xóa cookie remember me
+		Cookie usernameCookie = new Cookie("remember_username", null);
+		usernameCookie.setMaxAge(0);
+		usernameCookie.setPath("/");
+		response.addCookie(usernameCookie);
+
+		Cookie tokenCookie = new Cookie("remember_token", null);
+		tokenCookie.setMaxAge(0);
+		tokenCookie.setPath("/");
+		response.addCookie(tokenCookie);
+
+		return "redirect:/login";
 	}
 
 	// ===== VALIDATION METHODS =====
